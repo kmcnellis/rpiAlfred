@@ -2,6 +2,8 @@
 
 // analog pin for reading sonar
 const int sonar_an_pin = 7;
+const int right_an_pin = 0;
+const int left_an_pin = 1;
 
 
 long sonar_an_volt, inches, cm;
@@ -14,6 +16,8 @@ void setup() {
 
 void loop() {
     pinMode(sonar_an_pin, INPUT);
+    pinMode(right_an_pin, INPUT);
+    pinMode(left_an_pin, INPUT);
 
     //MaxSonar Analog reads are known to be very sensitive. See the Arduino forum for more information.
     //A simple fix is to average out a sample of n readings to get a more consistant reading.\\
@@ -37,6 +41,14 @@ void loop() {
     Serial.println();
 
     sum = 0;
+
+
+
+    int rval = analogRead(right_an_pin);
+    int lval = analogRead(left_an_pin);
+    Serial.println(rval);
+    Serial.println(lval);
+
     delay(500);
 }
 
