@@ -14,15 +14,15 @@ int leftvalues[20];
 int rightvalues[20];
 int index = 0;
 int average =0;
-int total;
 
 void average_func()
 {
-  l_total = 0;
-  r_total = 0;
+  int l_total = 0;
+  int r_total = 0;
   for (int i=0; i < sizeof(leftvalues); i++)
   {
-    l_total+= values[i];
+    l_total+= leftvalues[i];
+    r_total += rightvalues[i];
   }
   average = l_total/sizeof(values);
 }
