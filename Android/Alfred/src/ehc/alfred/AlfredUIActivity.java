@@ -356,8 +356,8 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	}
 
 	private void onSodaButton(ImageButton button, int button_index) {
-		logToast("Button: " + button_index);
-		button.setEnabled(false);
+		logToast("Soda Button: " + button_index);
+		// button.setEnabled(false);
 	}
 
 	private void logToast(String str) {
