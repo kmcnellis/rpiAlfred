@@ -42,7 +42,8 @@ int back_rightvalues[LENGTH_CACHE];
 
 int index = 0;
 int fl_average,fr_average,bl_average,br_average;
-
+int fl_total=0, fr_total=0, bl_total=0, br_total=0;
+  
 int t_speed=255;
 
 //function definitions
@@ -71,6 +72,12 @@ void loop()
 {
   read_ldrs();
   check_values();
+  index += 1;
+  if (index == 20)
+  {
+    index=0;
+  }
+  
   delay(100);
 }
 
@@ -78,7 +85,8 @@ void loop()
 
 int total_func(int array[])
 {
-  int total = 0;
+  int total=0;
+  
   for (int i=0; i < LENGTH_CACHE; i++)
   {
     if (array[i] >0)
@@ -86,15 +94,32 @@ int total_func(int array[])
       total += array[i];
     }
   }
-  return total;
 }
 
+int total_change()
+{
+  int last_index=0;
+  last_index=index+1
+  if (last_index==20)
+    last_index=0;
+  
+    
+  fl_total += front_leftvalues[index];
+  fl_total -= front_leftvalues[last_index];
+  
+  fr_total += front_rightvalues[index];
+  fr_total -= front_rightvalues[last_index];
+  
+  bl_total += back_leftvalues[index];
+  bl_total -= back_leftvalues[last_index];
+  
+  br_total += back_rightvalues[index];
+  br_total -= back_rightvalues[last_index];
+  
+}
 void average_func()
 {
-  int fl_total = total_func(front_leftvalues);
-  int fr_total = total_func(front_rightvalues);
-  int bl_total = total_func(back_leftvalues);
-  int br_total = total_func(back_rightvalues);
+  total_change();
   
   fl_average = fl_total/LENGTH_CACHE;
   fr_average = fr_total/LENGTH_CACHE;
@@ -108,24 +133,18 @@ void read_ldrs()
   front_rightvalues[index] = analogRead(FRONTRIGHT);
   back_leftvalues[index] = analogRead(BACKLEFT);
   back_rightvalues[index] = analogRead(BACKRIGHT);  
-  
-  index += 1;
-  if (index == 20)
-  {
-    index =0;
-  }
 }
 
 void check_values()
 {
   average_func();
-  if(abs(front_leftvalues[index-1]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
+  if(abs(front_leftvalues[index]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     //Turn Right
     Serial.println("Right");
     turn(RIGHT);
   }
-  else if(abs(front_rightvalues[index-1] -fr_average)>DIFFERENCE)
+  else if(abs(front_rightvalues[index] -fr_average)>DIFFERENCE)
   {
     //Turn LEFT
     Serial.println("Left");
