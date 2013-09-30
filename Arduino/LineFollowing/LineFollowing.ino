@@ -2,8 +2,6 @@
 #define FRONTLEFT A1
 #define BACKRIGHT A2
 #define BACKLEFT A3
-#define MOTOR1 2
-#define MOTOR2 3
 #define LENGTH_CACHE 20
 #define DIFFERENCE 10
 
@@ -42,30 +40,26 @@ int front_rightvalues[LENGTH_CACHE];
 int back_leftvalues[LENGTH_CACHE];
 int back_rightvalues[LENGTH_CACHE];
 
-int onLine=255;
-int onLine=0;
-int absDiff=5;
-
 int index = 0;
 int fl_average,fr_average,bl_average,br_average;
 
-int num_vals=0;
-
+int t_speed=255;
 
 //function definitions
 int total_func(int);
 void average_func();
 void read_ldrs();
 void check_values();
-void turn(int,int);
+void turn(int);
 
 void setup()
 {
     Serial.begin(9600);  //Begin serial communcation
     
-    pinMode(MOTOR1,OUTPUT);
-  
-    pinMode(MOTOR2,OUTPUT);
+    pinMode(rMotorf,OUTPUT);
+    pinMode(rMotorb,OUTPUT);
+    pinMode(lMotorf,OUTPUT);
+    pinMode(lMotorb,OUTPUT);
     
     for (int i = 0;i<20;i++)
     {
@@ -125,8 +119,7 @@ void read_ldrs()
 void check_values()
 {
   average_func();
-  if((abs(front_leftvalues[index-1]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
-  //if((abs(front_leftvalues[index-1]-fl_average)>DIFFERENCE) || (((abs(front_leftvalues[index-1]-offLine))<absDiff) && (abs(front_leftvalues[index-1]-onLine))>absDiff) )
+  if(abs(front_leftvalues[index-1]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     //Turn Right
     Serial.println("Right");
@@ -142,7 +135,7 @@ void check_values()
     turn(FORWARD);
 }
 
-void turn(int turn_signal, int t_speed=255) {
+void turn(int turn_signal) {
   int rmotor = 0;
   int lmotor = 0;
   int slowSpeed = t_speed/2;
