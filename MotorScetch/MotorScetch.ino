@@ -1,6 +1,6 @@
-#define ROTATION_CLOCKWISE 0
-#define ROTATION_COUNTERCLOCKWISE 1
-#define ROTATION_STOP 2
+#define ROTATE_RIGHT 0
+#define ROTATE_LEFT 1
+#define ROTATE_STOP 2
 
 #define RIGHT 3
 #define LEFT 4
@@ -8,13 +8,8 @@
 #define BACK 6
 #define STOP 7
 
-#define S_RIGHT 8
-#define S_LEFT 9
-#define S_FORWARD 10
-#define S_BACK 11
-
-#define F_RIGHT 12
-#define F_LEFT 13
+#define F_RIGHT 8
+#define F_LEFT 19
 
 #define GO 1
 #define STILL 0
@@ -27,13 +22,12 @@
 #define lMotorf 6
 #define lMotorb 9
 
-#define slowSpeed 128
 
 
-void turn(int turn_signal) {
+void turn(int turn_signal, int t_speed=255) {
   int rmotor = 0;
   int lmotor = 0;
-
+  int slowSpeed = t_speed/2;
   switch (turn_signal){
   case RIGHT:
     Serial.write("Turn Right");
@@ -65,46 +59,22 @@ void turn(int turn_signal) {
     lmotor = STILL;
     break;
 
-  case ROTATION_CLOCKWISE:
-    Serial.write("ROTATION_CLOCKWISE");
+  case ROTATE_RIGHT:
+    Serial.write("Rotate Right");
     rmotor = REV;
     lmotor = GO;
     break;
 
-  case ROTATION_COUNTERCLOCKWISE:
-    Serial.write("ROTATION_COUNTERCLOCKWISE");
+  case ROTATE_LEFT:
+    Serial.write("Rotate Left");
     rmotor = GO;
     lmotor = REV;
     break;
 
-  case ROTATION_STOP:
-    Serial.write("ROTATION_STOP");
+  case ROTATE_STOP:
+    Serial.write("Stop");
     rmotor = STILL;
     lmotor = STILL;
-    break;
-
-  case S_RIGHT:
-    Serial.write("Turn Right Slowly");
-    rmotor = SLOW_GO;
-    lmotor = STILL;
-    break;
-
-  case S_LEFT:
-    Serial.write("Turn Left Slowly");
-    rmotor = STILL;
-    lmotor = SLOW_GO;
-    break;
-
-  case S_FORWARD:
-    Serial.write("Go Forward Slowly");
-    rmotor = SLOW_GO;
-    lmotor = SLOW_GO;
-    break;
-
-  case S_BACK:
-    Serial.write("Go Backwards Slowly");
-    rmotor = SLOW_REV;
-    lmotor = SLOW_REV;
     break;
 
   case F_RIGHT:
@@ -121,7 +91,8 @@ void turn(int turn_signal) {
   }
   switch (rmotor){
   case GO:
-    digitalWrite(rMotorf, HIGH);
+    analogWrite(rMotorf, t_speed);
+   // digitalWrite(rMotorf, HIGH);
     digitalWrite(rMotorb, LOW);
     break;
 
@@ -132,7 +103,8 @@ void turn(int turn_signal) {
 
   case REV:
     digitalWrite(rMotorf, LOW);
-    digitalWrite(rMotorb, HIGH);
+    //digitalWrite(rMotorb, HIGH);
+    analogWrite(rMotorb, t_speed);
     break;
 
   case SLOW_GO:
@@ -148,7 +120,8 @@ void turn(int turn_signal) {
 
   switch (lmotor){
   case GO:
-    digitalWrite(lMotorf, HIGH);
+    analogWrite(lMotorf, t_speed);
+   // digitalWrite(lMotorf, HIGH);
     digitalWrite(lMotorb, LOW);
     break;
 
@@ -159,7 +132,8 @@ void turn(int turn_signal) {
 
   case REV:
     digitalWrite(lMotorf, LOW);
-    digitalWrite(lMotorb, HIGH);
+    //digitalWrite(lMotorb, HIGH);
+    analogWrite(lMotorb, t_speed);
     break;
 
   case SLOW_GO:
@@ -184,5 +158,6 @@ void setup()
 
 void loop()
 {
+ 
 }
 
