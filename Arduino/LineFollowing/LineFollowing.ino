@@ -114,9 +114,9 @@ int total_change()
   bl_total -= back_leftvalues[last_index];
   
   br_total += back_rightvalues[index];
-  br_total -= back_rightvalues[last_index];
-  
+  br_total -= back_rightvalues[last_index]; 
 }
+
 void average_func()
 {
   total_change();
