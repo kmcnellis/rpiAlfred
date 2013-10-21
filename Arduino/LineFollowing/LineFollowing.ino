@@ -30,6 +30,9 @@
 #define lMotorf 6
 #define lMotorb 9
 
+#define LED 12
+#define IR A3
+
 
 const int DARK_ON_LIGHT = 0;
 const int LIGHT_ON_DARK = 1;
@@ -61,6 +64,7 @@ void setup()
     pinMode(rMotorb,OUTPUT);
     pinMode(lMotorf,OUTPUT);
     pinMode(lMotorb,OUTPUT);
+    pinMode(LED, OUTPUT);
     
     for (int i = 0;i<20;i++)
     {
@@ -70,6 +74,7 @@ void setup()
 
 void loop()
 {
+  digitalWrite(LED, HIGH);
   read_ldrs();
   check_values();
   index += 1;
@@ -77,6 +82,8 @@ void loop()
   {
     index=0;
   }
+  
+  Serial.println(analogRead(IR));
   
   delay(100);
 }
@@ -99,7 +106,7 @@ int total_func(int array[])
 int total_change()
 {
   int last_index=0;
-  last_index=index+1
+  last_index=index+1;
   if (last_index==20)
     last_index=0;
   
@@ -141,13 +148,13 @@ void check_values()
   if(abs(front_leftvalues[index]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     //Turn Right
-    Serial.println("Right");
+//    Serial.println("Right");
     turn(RIGHT);
   }
   else if(abs(front_rightvalues[index] -fr_average)>DIFFERENCE)
   {
     //Turn LEFT
-    Serial.println("Left");
+    //Serial.println("Left");
     turn(LEFT);
   }
   else
@@ -160,61 +167,61 @@ void turn(int turn_signal) {
   int slowSpeed = t_speed/2;
   switch (turn_signal){
   case RIGHT:
-    Serial.write("Turn Right");
+    Serial.println("Turn Right");
     rmotor = GO;
     lmotor = STILL;
     break;
 
   case LEFT:
-    Serial.write("Turn Left");
+    Serial.println("Turn Left");
     rmotor = STILL;
     lmotor = GO;
     break;
 
   case FORWARD:
-    Serial.write("Go Forward");
+    Serial.println("Go Forward");
     rmotor = GO;
     lmotor = GO;
     break;
 
   case BACK:
-    Serial.write("Go Backwards");
+    Serial.println("Go Backwards");
     rmotor = REV;
     lmotor = REV;
     break;
 
   case STOP:
-    Serial.write("Stop");
+    Serial.println("Stop");
     rmotor = STILL;
     lmotor = STILL;
     break;
 
   case ROTATE_RIGHT:
-    Serial.write("Rotate Right");
+    Serial.println("Rotate Right");
     rmotor = REV;
     lmotor = GO;
     break;
 
   case ROTATE_LEFT:
-    Serial.write("Rotate Left");
+    Serial.println("Rotate Left");
     rmotor = GO;
     lmotor = REV;
     break;
 
   case ROTATE_STOP:
-    Serial.write("Stop");
+    Serial.println("Stop");
     rmotor = STILL;
     lmotor = STILL;
     break;
 
   case F_RIGHT:
-    Serial.write("Turn Right while Moving");
+    Serial.println("Turn Right while Moving");
     rmotor = GO;
     lmotor = SLOW_GO;
     break;
 
   case F_LEFT:
-    Serial.write("Turn Left while Moving");
+    Serial.println("Turn Left while Moving");
     rmotor = SLOW_GO;
     lmotor = GO;
     break;    
