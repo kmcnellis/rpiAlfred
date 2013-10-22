@@ -94,7 +94,7 @@ int total_func(int array[])
 {
   int total=0;
   
-  for (int i=0; i < LENGTH_CACHE; i++)
+  for (int i=0; i <= LENGTH_CACHE; i++)
   {
     if (array[i] >0)
     {
@@ -144,7 +144,7 @@ void read_ldrs()
   Serial.print(" | ");
   //Serial.println(front_leftvalues[LENGTH_CACHE-1]);
   front_rightvalues[index] = analogRead(FRONTRIGHT);
-  //Serial.println(analogRead(FRONTRIGHT));
+  Serial.println(analogRead(FRONTRIGHT));
   //Serial.println(front_rightvalues[LENGTH_CACHE]);
   back_leftvalues[index] = analogRead(BACKLEFT);
   back_rightvalues[index] = analogRead(BACKRIGHT);
