@@ -65,11 +65,54 @@ void setup()
     pinMode(lMotorf,OUTPUT);
     pinMode(lMotorb,OUTPUT);
     pinMode(LED, OUTPUT);
-    
+    Serial.println("Setup");
+    for (index = 0;index<20;index++)
+    {
+      
+      read_ldrs();
+      fl_total+=front_leftvalues[index];
+      fr_total+=front_rightvalues[index];
+      bl_total+=back_leftvalues[index];
+      br_total+=back_rightvalues[index];
+
+    }
+    Serial.println();
+    Serial.print("Front Left");
     for (int i = 0;i<20;i++)
     {
-      read_ldrs();
+      
+      Serial.print(front_leftvalues[i]);
+      Serial.print(" | ");
+
     }
+    Serial.println();
+    Serial.print("Front Right");
+    for (int i = 0;i<20;i++)
+    {
+      
+      Serial.print(front_rightvalues[i]);
+      Serial.print(" | ");
+
+    }
+    Serial.println();
+    Serial.print("Back Left");
+    for (int i = 0;i<20;i++)
+    {
+      
+      Serial.print(back_leftvalues[i]);
+      Serial.print(" | ");
+
+    }
+    Serial.println();
+    Serial.print("Back Right");
+    for (int i = 0;i<20;i++)
+    {
+      
+      Serial.print(back_rightvalues[i]);
+      Serial.print(" | ");
+
+    }
+    Serial.println();
 }
 
 void loop()
@@ -78,10 +121,7 @@ void loop()
   read_ldrs();
   check_values();
   index += 1;
-  if (index == 20)
-  {
-    index=0;
-  }
+  index=index%20;
   
   //Serial.println(analogRead(IR));
   
@@ -142,6 +182,7 @@ void read_ldrs()
   front_leftvalues[index] = analogRead(FRONTLEFT);
   Serial.print(analogRead(FRONTLEFT));
   Serial.print(" | ");
+  
   //Serial.println(front_leftvalues[LENGTH_CACHE-1]);
   front_rightvalues[index] = analogRead(FRONTRIGHT);
   Serial.println(analogRead(FRONTRIGHT));
@@ -153,16 +194,22 @@ void read_ldrs()
 void check_values()
 {
   average_func();
+
   if(abs(front_leftvalues[index]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     //Turn Right
 //    Serial.println("Right");
+    Serial.print(fl_average);
+    Serial.print(" | ");
     turn(RIGHT);
   }
   else if(abs(front_rightvalues[index] -fr_average)>DIFFERENCE)
   {
     //Turn LEFT
     //Serial.println("Left");
+
+    Serial.print(fr_average);
+    Serial.print(" | ");
     turn(LEFT);
   }
   else
