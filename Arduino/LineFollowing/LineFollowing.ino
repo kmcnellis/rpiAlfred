@@ -3,7 +3,7 @@
 #define BACKRIGHT A2
 #define BACKLEFT A3
 #define LENGTH_CACHE 20
-#define DIFFERENCE 10
+#define DIFFERENCE 5
 
 // rotation signals
 #define ROTATE_RIGHT 0
@@ -83,9 +83,9 @@ void loop()
     index=0;
   }
   
-  Serial.println(analogRead(IR));
+  //Serial.println(analogRead(IR));
   
-  delay(100);
+  delay(200);
 }
 
 
@@ -129,7 +129,10 @@ void average_func()
   total_change();
   
   fl_average = fl_total/LENGTH_CACHE;
+  Serial.print(fl_average);
+  Serial.print("  |  ");
   fr_average = fr_total/LENGTH_CACHE;
+  Serial.println(fr_average);
   bl_average = bl_total/LENGTH_CACHE;
   br_average = br_total/LENGTH_CACHE;
 }
@@ -137,9 +140,14 @@ void average_func()
 void read_ldrs()
 {
   front_leftvalues[index] = analogRead(FRONTLEFT);
+  //Serial.print(analogRead(FRONTLEFT));
+  //Serial.print(" | \n");
+  //Serial.println(front_leftvalues[LENGTH_CACHE-1]);
   front_rightvalues[index] = analogRead(FRONTRIGHT);
+  //Serial.println(analogRead(FRONTRIGHT));
+  //Serial.println(front_rightvalues[LENGTH_CACHE]);
   back_leftvalues[index] = analogRead(BACKLEFT);
-  back_rightvalues[index] = analogRead(BACKRIGHT);  
+  back_rightvalues[index] = analogRead(BACKRIGHT);
 }
 
 void check_values()
