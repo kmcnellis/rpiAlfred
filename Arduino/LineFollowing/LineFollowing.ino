@@ -129,10 +129,10 @@ void average_func()
   total_change();
   
   fl_average = fl_total/LENGTH_CACHE;
-  Serial.print(fl_average);
-  Serial.print("  |  ");
+  //Serial.print(fl_average);
+  //Serial.print("  |  ");
   fr_average = fr_total/LENGTH_CACHE;
-  Serial.println(fr_average);
+  //Serial.println(fr_average);
   bl_average = bl_total/LENGTH_CACHE;
   br_average = br_total/LENGTH_CACHE;
 }
@@ -140,8 +140,8 @@ void average_func()
 void read_ldrs()
 {
   front_leftvalues[index] = analogRead(FRONTLEFT);
-  //Serial.print(analogRead(FRONTLEFT));
-  //Serial.print(" | \n");
+  Serial.print(analogRead(FRONTLEFT));
+  Serial.print(" | ");
   //Serial.println(front_leftvalues[LENGTH_CACHE-1]);
   front_rightvalues[index] = analogRead(FRONTRIGHT);
   //Serial.println(analogRead(FRONTRIGHT));
