@@ -201,6 +201,8 @@ void check_values()
 //    Serial.println("Right");
     Serial.print(fl_average);
     Serial.print(" | ");
+    Serial.print(fl_total);
+    Serial.print(" | ");
     turn(RIGHT);
   }
   else if(abs(front_rightvalues[index] -fr_average)>DIFFERENCE)
@@ -209,6 +211,8 @@ void check_values()
     //Serial.println("Left");
 
     Serial.print(fr_average);
+    Serial.print(" | ");
+    Serial.print(fr_total);
     Serial.print(" | ");
     turn(LEFT);
   }
