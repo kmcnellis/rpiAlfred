@@ -61,11 +61,31 @@ void read_ldrs();
 void check_values();
 void turn(int);
 void total_change();
-
+void start_line();
 
 
 void setup()
 {
+  Serial.begin(9600);  //Begin serial communcation
+  start_line();
+}
+
+void loop()
+{
+  digitalWrite(LED, HIGH);
+  read_ldrs();
+  check_values();
+  index += 1;
+  index=index%20;
+
+
+  //Serial.println(analogRead(IR));
+
+  delay(200);
+}
+void start_line()
+{
+  
   inFR=0;
   inFL=0;
   inBR=0;
@@ -80,7 +100,7 @@ void setup()
   fr_total=0; 
   bl_total=0; 
   br_total=0;
-  Serial.begin(9600);  //Begin serial communcation
+  
 
   pinMode(rMotorf,OUTPUT);
   pinMode(rMotorb,OUTPUT);
@@ -147,22 +167,9 @@ void setup()
   Serial.println();
   index=0;
   check_values();
+  
+  return;
 }
-
-void loop()
-{
-  digitalWrite(LED, HIGH);
-  read_ldrs();
-  check_values();
-  index += 1;
-  index=index%20;
-
-
-  //Serial.println(analogRead(IR));
-
-  delay(200);
-}
-
 void read_ldrs()
 {
   front_leftvalues[index] = analogRead(FRONTLEFT);
