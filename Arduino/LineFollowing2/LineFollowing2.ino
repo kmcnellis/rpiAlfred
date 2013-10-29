@@ -49,6 +49,11 @@ int fl_total=0, fr_total=0, bl_total=0, br_total=0;
 
 int t_speed=255;
 
+int inFR=0;
+int inFL=0;
+int inBR=0;
+int inBL=0;
+
 //function definitions
 int total_func(int);
 void average_func();
@@ -57,8 +62,15 @@ void check_values();
 void turn(int);
 void total_change();
 
+
+
 void setup()
 {
+  inFR=0;
+  inFL=0;
+  inBR=0;
+  inBL=0;
+
   index = 0;
   fl_average=0;
   fr_average=0;
@@ -85,7 +97,16 @@ void setup()
     br_total+=back_rightvalues[index];
 
   }
-
+  fl_average = fl_total/LENGTH_CACHE;
+  fr_average = fr_total/LENGTH_CACHE;
+  bl_average = bl_total/LENGTH_CACHE;
+  br_average = br_total/LENGTH_CACHE;
+  
+  inFR=fr_average;
+  inFL=fl_average;
+  inBR=br_average;
+  inBL=bl_average;
+  
   Serial.println();
   Serial.print("Front Left");
 
@@ -154,7 +175,7 @@ void read_ldrs()
 void check_values()
 {
   average_func();
-  if(abs(front_leftvalues[index]-fl_average)>DIFFERENCE)//this won't work for gradual/slow changes
+  if(abs(front_leftvalues[index]-inFL)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     Serial.print(fl_average);
     Serial.print("|");
@@ -162,7 +183,7 @@ void check_values()
 
     turn(RIGHT);
   }
-  else if(abs(front_rightvalues[index] -fr_average)>DIFFERENCE)
+  else if(abs(front_rightvalues[index] -inFR)>DIFFERENCE)
   {
     Serial.print(fl_average);
     Serial.print("|");
