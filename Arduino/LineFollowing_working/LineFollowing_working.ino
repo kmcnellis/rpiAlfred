@@ -3,7 +3,7 @@
 #define BACKRIGHT A2
 #define BACKLEFT A3
 #define LENGTH_CACHE 20
-#define DIFFERENCE 5
+#define DIFFERENCE 15
 
 // rotation signals
 #define ROTATE_RIGHT 0
@@ -111,10 +111,16 @@ void start_line()
   for (index = 0;index<LENGTH_CACHE;index++)
   {
     read_ldrs();
+    delay(10);
+  }
+  for (index = 0;index<LENGTH_CACHE;index++)
+  {
+    read_ldrs();
     fl_total+=front_leftvalues[index];
     fr_total+=front_rightvalues[index];
     bl_total+=back_leftvalues[index];
     br_total+=back_rightvalues[index];
+    delay(50);
 
   }
   fl_average = fl_total/LENGTH_CACHE;
