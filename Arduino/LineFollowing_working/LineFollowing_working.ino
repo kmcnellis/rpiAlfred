@@ -33,8 +33,8 @@
 #define IR A3
 
 
-#define DARK_ON_LIGHT  0
-#define LIGHT_ON_DARK  1
+#define DARK_ON_LIGHT 0
+#define LIGHT_ON_DARK 1
 
 const int MODE = DARK_ON_LIGHT;
 
@@ -59,7 +59,7 @@ unsigned long sensorTimer;
 //function definitions
 
 
-boolean initial;
+boolean init
 void read_ldrs();
 void average_func();
 void check_values();
@@ -75,7 +75,7 @@ void setup()
   pinMode(lMotorf,OUTPUT);
   pinMode(lMotorb,OUTPUT);
   pinMode(LED, OUTPUT);
-  initial=false;
+  init=false
 
   initCloseRight=0; 
   initCloseLeft=0;
@@ -97,29 +97,28 @@ void setup()
 
 void loop()
 {  
-  if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
-    sensorTimer += sensorSpeed;  
-    digitalWrite(LED, HIGH);
-    read_ldrs();
-    index += 1;
-    index=index%20;
-    if (index==19 && initial==true){
-      check_values();
-      closeLeft_total=0; 
-      closeRight_total=0; 
-      farLeft_total=0; 
-      farRight_total=0;
-    }
-    if(index==19 && initial==false){
-      average_func();
-      initCloseRight= closeLeft_average;
-      initCloseLeft= closeRight_average;
-      initFarRight=farLeft_average=0;
-      initFarLeft= farRight_average=0;
-      initial==true;
-
-    }
-  }
+//  if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
+//    sensorTimer += sensorSpeed;  
+//    digitalWrite(LED, HIGH);
+//    read_ldrs();
+//    index += 1;
+//    index=index%20;
+//    if (index==19 && init==true){
+//      check_values();
+//      closeLeft_total=0; 
+//      closeRight_total=0; 
+//      farLeft_total=0; 
+//      farRight_total=0;
+//    }
+//    if(index==19 && init==false){
+//      average_func();
+//      initCloseRight= closeLeft_average;
+//      initCloseLeft= closeRight_average;
+//      initFarRight=farLeft_average=0;
+//      initFarLeft= farRight_average=0;
+//
+//    }
+//  }
 
 }
 
