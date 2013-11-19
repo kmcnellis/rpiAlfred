@@ -1,7 +1,8 @@
-#define CLOSERIGHT A0
+#define CLOSERIGHT A2
 #define CLOSELEFT A1
-#define FARRIGHT A2
-#define FARLEFT A3
+#define FARRIGHT A3
+#define FARLEFT A0
+#define CENTER A4
 #define LENGTH_CACHE 20
 #define DIFFERENCE 15
 // rotation signals
