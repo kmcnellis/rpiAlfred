@@ -215,7 +215,7 @@ void check_values()
     }
     else
     {  
-      turn(F_RIGHT);
+      turn(LEFT);
     }
   }
   else if(diffRight>diffLeft && diffRight>DIFFERENCE)
