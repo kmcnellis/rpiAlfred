@@ -1,10 +1,10 @@
-#define FRONTRIGHT A0
-#define FRONTLEFT A1
-#define BACKRIGHT A2
-#define BACKLEFT A3
+#define CLOSERIGHT A2
+#define CLOSELEFT A1
+#define FARRIGHT A3
+#define FARLEFT A0
+#define CENTER A4
 #define LENGTH_CACHE 20
 #define DIFFERENCE 15
-
 // rotation signals
 #define ROTATE_RIGHT 0
 #define ROTATE_LEFT 1
@@ -15,7 +15,7 @@
 #define FORWARD 5
 #define BACK 6
 #define STOP 7
-
+ 
 #define F_RIGHT 8
 #define F_LEFT 19
 //motor control
@@ -34,30 +34,41 @@
 #define IR A3
 
 
-const int DARK_ON_LIGHT = 0;
-const int LIGHT_ON_DARK = 1;
+#define DARK_ON_LIGHT  0
+#define LIGHT_ON_DARK  1
+
 const int MODE = DARK_ON_LIGHT;
 
-int front_leftvalues[LENGTH_CACHE];
-int front_rightvalues[LENGTH_CACHE];
-int back_leftvalues[LENGTH_CACHE];
-int back_rightvalues[LENGTH_CACHE];
+int closeLeftValues;
+int closeRightValues;
+int farLeftValues;
+int farRightValues;
+int centerValues;
 
 int index = 0;
-int fl_average=0,fr_average=0,bl_average=0,br_average=0;
-int fl_total=0, fr_total=0, bl_total=0, br_total=0;
+int closeLeft_average=0,closeRight_average=0,farLeft_average=0,farRight_average=0,center_average=0;
+int closeLeft_total=0, closeRight_total=0, farLeft_total=0, farRight_total=0;
 
 int t_speed=255;
+//Contains intial values
+int initCloseRight=0;
+int initCloseLeft=0;
+int initFarRight=0;
+int initFarLeft=0;
+int initCenter=0;
 
-int inFR=0;
-int inFL=0;
-int inBR=0;
-int inBL=0;
-
+#define sensorSpeed 10   
+unsigned long sensorTimer;  
+const int numSensor = LENGTH_CACHE-1;// number of values in array
 //function definitions
-int total_func(int);
-void average_func();
+
+
+boolean initial;
+boolean first;
+boolean turnModeR;
+boolean turnModeL;
 void read_ldrs();
+void average_func();
 void check_values();
 void turn(int);
 void total_change();
@@ -67,147 +78,168 @@ void start_line();
 void setup()
 {
   Serial.begin(9600);  //Begin serial communcation
-  start_line();
-}
-
-void loop()
-{
-  digitalWrite(LED, HIGH);
-  read_ldrs();
-  check_values();
-  index += 1;
-  index=index%20;
-
-
-  //Serial.println(analogRead(IR));
-
-  delay(200);
-}
-void start_line()
-{
-  
-  inFR=0;
-  inFL=0;
-  inBR=0;
-  inBL=0;
-
-  index = 0;
-  fl_average=0;
-  fr_average=0;
-  bl_average=0;
-  br_average=0;
-  fl_total=0; 
-  fr_total=0; 
-  bl_total=0; 
-  br_total=0;
-  
-
   pinMode(rMotorf,OUTPUT);
   pinMode(rMotorb,OUTPUT);
   pinMode(lMotorf,OUTPUT);
   pinMode(lMotorb,OUTPUT);
   pinMode(LED, OUTPUT);
-  Serial.println("Setup");
-  for (index = 0;index<LENGTH_CACHE;index++)
-  {
-    read_ldrs();
-    delay(10);
-  }
-  for (index = 0;index<LENGTH_CACHE;index++)
-  {
-    read_ldrs();
-    fl_total+=front_leftvalues[index];
-    fr_total+=front_rightvalues[index];
-    bl_total+=back_leftvalues[index];
-    br_total+=back_rightvalues[index];
-    delay(50);
+  initial=false;
+  first=false;
+  turnModeR=false;
+  turnModeL=false;
+  initCloseRight=0; 
+  initCloseLeft=0;
+  initFarRight=0;
+  initFarLeft=0;
+  initCenter=0;
 
-  }
-  fl_average = fl_total/LENGTH_CACHE;
-  fr_average = fr_total/LENGTH_CACHE;
-  bl_average = bl_total/LENGTH_CACHE;
-  br_average = br_total/LENGTH_CACHE;
+  index = 0;
+  closeLeft_average=0;
+  closeRight_average=0;
+  farLeft_average=0;
+  farRight_average=0;
   
-  inFR=fr_average;
-  inFL=fl_average;
-  inBR=br_average;
-  inBL=bl_average;
-  
-  Serial.println();
-  Serial.print("Front Left");
+  closeLeft_total=0; 
+  closeRight_total=0; 
+  farLeft_total=0; 
+  farRight_total=0;
 
-  for (int i = 0;i<20;i++)
-  {
-    Serial.print(front_leftvalues[i]);
-    Serial.print(" | ");
+  sensorTimer = millis()+100;
+  for (int a=0;a<=numSensor;a++){ 
+  closeLeftValues = analogRead(CLOSELEFT);
+  closeRightValues = analogRead(CLOSERIGHT);
+  farLeftValues = analogRead(FARLEFT);
+  farRightValues = analogRead(FARRIGHT);
+  delay(5);
   }
-
-  Serial.println();
-  Serial.print("Front Right");
-  for (int i = 0;i<20;i++)
-  {
-
-    Serial.print(front_rightvalues[i]);
-    Serial.print(" | ");
-
-  }
-
-  Serial.println();
-  Serial.print("Back Left");
-  for (int i = 0;i<20;i++)
-  {
-
-    Serial.print(back_leftvalues[i]);
-    Serial.print(" | ");
-
-  }
-  Serial.println();
-  Serial.print("Back Right");
-  for (int i = 0;i<20;i++)
-  {
-
-    Serial.print(back_rightvalues[i]);
-    Serial.print(" | ");
-
-  }
-  Serial.println();
-  index=0;
-  check_values();
-  
-  return;
 }
+
+void loop()
+{  
+  if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
+    sensorTimer += sensorSpeed;  
+    digitalWrite(LED, HIGH);
+    read_ldrs();
+    if (initial==false){
+      Serial.print(closeLeftValues);
+      Serial.print(" , ");
+      Serial.print(closeRightValues);
+      Serial.print(" | ");
+
+    }
+    
+    if (index==numSensor && initial==true){// initial = true means it was intialized index==numSensor
+      check_values();
+      closeLeft_total=0; 
+      closeRight_total=0; 
+      farLeft_total=0; 
+      farRight_total=0;
+    }
+    else if(index==numSensor && initial==false){
+      
+      average_func();
+      
+      initCloseLeft= closeLeft_average;
+      initCloseRight= closeRight_average;
+      initFarLeft=farLeft_average;
+      initFarRight= farRight_average;
+      initCenter = center_average;
+      Serial.print(" = ");
+      Serial.println(closeLeft_average);
+      
+      closeLeft_total=0; 
+      closeRight_total=0; 
+      farLeft_total=0; 
+      farRight_total=0;
+      initial=true;
+    }
+    else if(index==numSensor &&first==false)
+    {
+      first==true;
+    }
+    index += 1;
+    index=index%(numSensor+1);
+  }
+
+}
+
 void read_ldrs()
 {
-  front_leftvalues[index] = analogRead(FRONTLEFT);
-  front_rightvalues[index] = analogRead(FRONTRIGHT);
-  back_leftvalues[index] = analogRead(BACKLEFT);
-  back_rightvalues[index] = analogRead(BACKRIGHT);
+  closeLeftValues = analogRead(CLOSELEFT);
+  closeRightValues = analogRead(CLOSERIGHT);
+  farLeftValues = analogRead(FARLEFT);
+  farRightValues = analogRead(FARRIGHT);
+  //Serial.print(closeLeftValues);
+
+
+  closeLeft_total+=closeLeftValues;
+  closeRight_total+=closeRightValues;
+  farLeft_total+=farLeftValues;
+  farRight_total+=farRightValues;
   return;
 }
 
 void check_values()
 {
   average_func();
-  if(abs(front_leftvalues[index]-inFL)>DIFFERENCE)//this won't work for gradual/slow changes
+  int diffLeft=abs(closeLeft_average-initCloseLeft);
+  int diffRight=abs(closeRight_average -initCloseRight);
+  int diffLeftFar=abs(farLeft_average-initFarLeft);
+  int diffRightFar=abs(farRight_average -initFarRight);
+/*
+  Serial.print(diffLeft);
+  Serial.print("|");
+  Serial.print(diffRight);
+  Serial.print("|");
+  Serial.print(closeLeft_average);
+  Serial.print("|");
+  Serial.print(closeRight_average);
+  Serial.print("|");
+  Serial.print(initCloseLeft);
+  Serial.print("|");
+  Serial.println(initCloseRight);
+*/
+  if(diffLeftFar>DIFFERENCE)
   {
-    Serial.print(fl_average);
-    Serial.print("|");
-    Serial.println(fr_average);
-
-    turn(RIGHT);
+    turnModeL=true;
+    turnModeR=false;
+    turn(F_RIGHT);
   }
-  else if(abs(front_rightvalues[index] -inFR)>DIFFERENCE)
+  else if(diffRightFar>DIFFERENCE)
   {
-    Serial.print(fl_average);
-    Serial.print("|");
-    Serial.println(fr_average);
-    turn(LEFT);
+    turnModeR=true;
+    turnModeL=false;
+    turn(F_LEFT);
+
+  }
+  else if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
+  {
+    if (turnModeL)
+    {
+      turn(F_RIGHT);
+    }
+    else
+    {  
+      turn(RIGHT);
+    }
+    turnModeR=false;
+  }
+  else if(diffRight>diffLeft && diffRight>DIFFERENCE)
+  {
+    if (turnModeR)
+    {
+      turn(F_LEFT);
+    }
+    else
+    {  
+      turn(LEFT);
+    }
+    turnModeL=false;
   }
   else
-  {
-    Serial.print(fl_average);
-    Serial.print("|");
-    Serial.println(fr_average);
+  { 
+    turnModeR=false;
+    turnModeL=false;
     turn(FORWARD);
   }
   return;
@@ -215,31 +247,11 @@ void check_values()
 
 void average_func()
 {
-  total_func();
-  fl_average = fl_total/LENGTH_CACHE;
-  fr_average = fr_total/LENGTH_CACHE;
-  bl_average = bl_total/LENGTH_CACHE;
-  br_average = br_total/LENGTH_CACHE;
-  return;
-}
 
-void total_func()
-{
-
-  fl_total =0;
-
-  fr_total =0;
-  bl_total =0;
-  br_total=0;
-  for (int a = 0;a<LENGTH_CACHE;a++)
-  {
-    read_ldrs();
-    fl_total+=front_leftvalues[a];
-    fr_total+=front_rightvalues[a];
-    bl_total+=back_leftvalues[a];
-    br_total+=back_rightvalues[a];
-
-  }
+  closeLeft_average = closeLeft_total/LENGTH_CACHE;
+  closeRight_average = closeRight_total/LENGTH_CACHE;
+  farLeft_average = farLeft_total/LENGTH_CACHE;
+  farRight_average = farRight_total/LENGTH_CACHE;
 
   return;
 }
@@ -298,13 +310,13 @@ void turn(int turn_signal) {
     break;
 
   case F_RIGHT:
-    Serial.println("Turn Right while Moving");
+    Serial.println("Turn Sharp Right");
     rmotor = GO;
     lmotor = SLOW_GO;
     break;
 
   case F_LEFT:
-    Serial.println("Turn Left while Moving");
+    Serial.println("Turn Sharp Left");
     rmotor = SLOW_GO;
     lmotor = GO;
     break;    
@@ -367,6 +379,3 @@ void turn(int turn_signal) {
     break;    
   }
 }
-
-
-
