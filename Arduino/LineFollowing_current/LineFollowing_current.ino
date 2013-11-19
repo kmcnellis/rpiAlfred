@@ -114,7 +114,10 @@ void loop()
     read_ldrs();
     if (initial==false){
       Serial.print(closeLeftValues);
+      Serial.print(" , ");
+      Serial.print(closeRightValues);
       Serial.print(" | ");
+
     }
     
     if (index==numSensor && initial==true){
@@ -129,10 +132,10 @@ void loop()
       
       average_func();
       
-      initCloseRight= closeLeft_average;
-      initCloseLeft= closeRight_average;
-      initFarRight=farLeft_average;
-      initFarLeft= farRight_average;
+      initCloseLeft= closeLeft_average;
+      initCloseRight= closeRight_average;
+      initFarLeft=farLeft_average;
+      initFarRight= farRight_average;
       Serial.print(" = ");
       Serial.println(closeLeft_average);
       
@@ -175,10 +178,15 @@ void check_values()
   Serial.print(diffLeft);
   Serial.print("|");
   Serial.print(diffRight);
-    Serial.print("|");
-    Serial.print(closeLeft_average);
   Serial.print("|");
-  Serial.println(closeRight_average);
+  Serial.print(closeLeft_average);
+  Serial.print("|");
+  Serial.print(closeRight_average);
+  Serial.print("|");
+  Serial.print(initCloseLeft);
+  Serial.print("|");
+  Serial.println(initCloseRight);
+  
   if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
   {
 
