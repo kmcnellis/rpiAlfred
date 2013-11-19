@@ -57,7 +57,7 @@ int initFarLeft=0;
 
 #define sensorSpeed 10   
 unsigned long sensorTimer;  
-const int numSensor = 19;
+const int numSensor = LENGTH_CACHE-1;// number of values in array
 //function definitions
 
 
@@ -123,7 +123,7 @@ void loop()
 
     }
     
-    if (index==numSensor && initial==true){
+    if (index==numSensor && initial==true){// initial = true means it was intialized index==numSensor
       check_values();
       closeLeft_total=0; 
       closeRight_total=0; 
@@ -166,6 +166,9 @@ void read_ldrs()
   farRightValues = analogRead(FARRIGHT);
   //Serial.print(closeLeftValues);
   //Serial.print("|");
+  centerValue = analogRead(CENTER);
+  centerValue_total += centerValue;
+
   closeLeft_total+=closeLeftValues;
   closeRight_total+=closeRightValues;
   farLeft_total+=farLeftValues;
