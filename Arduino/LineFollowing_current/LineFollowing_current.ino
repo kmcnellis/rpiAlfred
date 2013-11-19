@@ -57,20 +57,18 @@ int initFarLeft=0;
 
 #define sensorSpeed 10   
 unsigned long sensorTimer;  
-const int numSensor = 19;
+const int numSensor = LENGTH_CACHE-1;// number of values in array
 //function definitions
 
 
 boolean initial;
 boolean first;
-boolean turnMode;
 void read_ldrs();
 void average_func();
 void check_values();
 void turn(int);
 void total_change();
 void start_line();
-
 
 void setup()
 {
@@ -82,7 +80,7 @@ void setup()
   pinMode(LED, OUTPUT);
   initial=false;
   first=false;
-  turnMode=false;
+
   initCloseRight=0; 
   initCloseLeft=0;
   initFarRight=0;
@@ -123,7 +121,7 @@ void loop()
 
     }
     
-    if (index==numSensor && initial==true){
+    if (index==numSensor && initial==true){ // initial = true means it was intialized index==numSensor
       check_values();
       closeLeft_total=0; 
       closeRight_total=0; 
@@ -166,6 +164,8 @@ void read_ldrs()
   farRightValues = analogRead(FARRIGHT);
   //Serial.print(closeLeftValues);
   //Serial.print("|");
+  centerValue = analogRead(CENTER);
+  centerValue_total += centerValue;
   closeLeft_total+=closeLeftValues;
   closeRight_total+=closeRightValues;
   farLeft_total+=farLeftValues;
@@ -178,9 +178,6 @@ void check_values()
   average_func();
   int diffLeft=abs(closeLeft_average-initCloseLeft);
   int diffRight=abs(closeRight_average -initCloseRight);
-  int diffLeftFar=abs(farLeft_average-initFarLeft);
-  int diffRightFar=abs(farRight_average -initFarRight);
-/*
   Serial.print(diffLeft);
   Serial.print("|");
   Serial.print(diffRight);
@@ -192,35 +189,22 @@ void check_values()
   Serial.print(initCloseLeft);
   Serial.print("|");
   Serial.println(initCloseRight);
-*/
-  if(diffLeftFar>DIFFERENCE)
-  {
-    turnMode=true;
-    turn(F_LEFT);
-  }
-  if(diffRightFar>DIFFERENCE)
-  {
-    turnMode=true;
-    turn(F_RIGHT);
-
-  }
+  
   if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
   {
-    if (turnMode)
-    {
-      turn(F_LEFT);
-    }
-    else
-    {  
-      turn(F_RIGHT);
-    }
+
+
+    turn(RIGHT);
   }
   else if(diffRight>diffLeft && diffRight>DIFFERENCE)
   {
+   
     turn(LEFT);
   }
   else
-  { 
+  {
+
+    
     turn(FORWARD);
   }
   return;
@@ -360,6 +344,7 @@ void turn(int turn_signal) {
     break;    
   }
 }
+
 
 
 
