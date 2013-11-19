@@ -62,12 +62,14 @@ const int numSensor = 19;
 
 boolean initial;
 boolean first;
+boolean turnMode;
 void read_ldrs();
 void average_func();
 void check_values();
 void turn(int);
 void total_change();
 void start_line();
+
 
 void setup()
 {
@@ -79,7 +81,7 @@ void setup()
   pinMode(LED, OUTPUT);
   initial=false;
   first=false;
-
+  turnMode=false;
   initCloseRight=0; 
   initCloseLeft=0;
   initFarRight=0;
@@ -175,6 +177,9 @@ void check_values()
   average_func();
   int diffLeft=abs(closeLeft_average-initCloseLeft);
   int diffRight=abs(closeRight_average -initCloseRight);
+  int diffLeftFar=abs(farLeft_average-initFarLeft);
+  int diffRightFar=abs(farRight_average -initFarRight);
+/*
   Serial.print(diffLeft);
   Serial.print("|");
   Serial.print(diffRight);
@@ -186,22 +191,35 @@ void check_values()
   Serial.print(initCloseLeft);
   Serial.print("|");
   Serial.println(initCloseRight);
-  
+*/
+  if(diffLeftFar>DIFFERENCE)
+  {
+    turnMode=true;
+    turn(F_LEFT);
+  }
+  if(diffRightFar>DIFFERENCE)
+  {
+    turnMode=true;
+    turn(F_RIGHT);
+
+  }
   if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
   {
-
-
-    turn(RIGHT);
+    if (turnMode)
+    {
+      turn(F_LEFT);
+    }
+    else
+    {  
+      turn(F_RIGHT);
+    }
   }
   else if(diffRight>diffLeft && diffRight>DIFFERENCE)
   {
-   
     turn(LEFT);
   }
   else
-  {
-
-    
+  { 
     turn(FORWARD);
   }
   return;
