@@ -23,10 +23,18 @@ Motor State integers correspond to the following states...
 6   =  BACK 
 7   =  STOP 
 
+So if the motor was going forward and the dispensing sensor read 117, the arduino should send...
 
+    "5,117\n"
 
 
 ANDROID
 =========================
 
-The android device controls the arduino's 
+The android device controls the arduino's state (dispensing or moving)
+
+The device sends a message whenever it wants the arduino to change state.
+
+It sends "0\n" for the moving state, and "1\n" for the dispensing state.
+
+The arduino only cares about the last message sent.
