@@ -37,6 +37,8 @@
 #define DARK_ON_LIGHT  0
 #define LIGHT_ON_DARK  1
 
+#define BLUETOOTH_UPDATE_TIME 100 // Time between bluetooth messages
+
 const int MODE = DARK_ON_LIGHT;
 
 int closeLeftValues;
@@ -57,11 +59,20 @@ int initFarRight=0;
 int initFarLeft=0;
 int initCenter=0;
 
+int currentMotorState = STOP;
+
+// Time (in milliseconds since the programs start) at which the last bluetooth message was sent
+int lastSendTime = 0;
+
 #define sensorSpeed 10   
 unsigned long sensorTimer;  
 const int numSensor = LENGTH_CACHE-1;// number of values in array
-//function definitions
 
+
+boolean debugMode = true;
+boolean dispensing = false;
+
+//function definitions
 boolean initial;
 boolean turnModeR;
 boolean turnModeL;
@@ -72,6 +83,79 @@ void turn(int);
 void total_change();
 void start_line();
 
+
+void debugPrintln(String string){
+  if (debugMode){
+    Serial.println(string);
+  }
+}
+void debugPrint(String string){
+  if (debugMode){
+    Serial.print(string);
+  }
+}
+
+void debugPrintln(int integer){
+  if (debugMode){
+    Serial.println(integer);
+  }
+}
+void debugPrint(int integer){
+  if (debugMode){
+    Serial.print(integer);
+  }
+}
+
+// Send bluetooth message to android device
+void bluetoothWrite(int motorState, int cupLevel){
+  if (!debugMode){
+    // Send bluetooth device message
+    Serial.println(String(motorState) + "," + String(cupLevel));
+    Serial.flush();
+  }
+}
+
+// Read the LAST message sent from the android and interpret
+void bluetoothRead(){
+
+  // Fill line variable with serial contents
+  // Reset line if there is a newline character (so it only interprets the last message sent)
+
+  String line = "";
+  char character;
+
+  while (Serial.available()){
+    character = Serial.read();
+    if (character == '\n'){
+      line = "";
+    }else{
+      line.concat(character);
+    }
+  }
+
+  // Interpret contents of last message
+
+  // At the moment, there are only two possible cases
+  // "0" => Not Dispensing (Move)
+  // "1" => Dispensing (Don't Move)
+
+  if (line != ""){
+
+    int mode = line.toInt();
+
+    switch(mode){
+      case 0:
+      dispensing = false;
+      break;
+      case 1:
+      dispensing = true;
+      currentMotorState = STOP;
+      break;
+    }
+
+  }
+
+}
 
 void setup()
 {
@@ -107,49 +191,68 @@ void setup()
 }
 
 void loop()
-{  
-  if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
-    sensorTimer += sensorSpeed;  
-    digitalWrite(LED, HIGH);
-    read_ldrs();
-    if (initial==false){
-      Serial.print(closeLeftValues);
-      Serial.print(" , ");
-      Serial.print(closeRightValues);
-      Serial.print(" | ");
+{ 
+  // Send a bluetooth update every BLUETOOTH_UPDATE_TIME milliseconds 
+  if (millis() - lastSendTime >= BLUETOOTH_UPDATE_TIME){
+    bluetoothWrite(currentMotorState,0); // TODO replace 0 with dispensing sensor state
+    lastSendTime = millis();
+  }
 
-    }
+  bluetoothRead();
+
+  if (dispensing){
+
+
+
+  }else{
     
-    if (index==numSensor && initial==true){// initial = true means it was intialized index==numSensor
-      check_values();
-      closeLeft_total=0; 
-      closeRight_total=0; 
-      farLeft_total=0; 
-      farRight_total=0;
-      center_total = 0;
+    // Non-dispensing Mode (Alfred Moves)
+
+
+    if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
+      sensorTimer += sensorSpeed;  
+      digitalWrite(LED, HIGH);
+      read_ldrs();
+      if (initial==false){
+        debugPrint(closeLeftValues);
+        debugPrint(" , ");
+        debugPrint(closeRightValues);
+        debugPrint(" | ");
+
+      }
+      
+      if (index==numSensor && initial==true){// initial = true means it was intialized index==numSensor
+        check_values();
+        closeLeft_total=0; 
+        closeRight_total=0; 
+        farLeft_total=0; 
+        farRight_total=0;
+        center_total = 0;
+      }
+      else if(index==numSensor && initial==false){
+        
+        average_func();
+        
+        initCloseLeft= closeLeft_average;
+        initCloseRight= closeRight_average;
+        initFarLeft=farLeft_average;
+        initFarRight= farRight_average;
+        initCenter = center_average;
+        
+        
+        debugPrint(" = ");
+        debugPrintln(closeLeft_average);
+        
+        closeLeft_total=0; 
+        closeRight_total=0; 
+        farLeft_total=0; 
+        farRight_total=0;
+        initial=true;
+      }
+      index += 1;
+      index=index%(numSensor+1);
     }
-    else if(index==numSensor && initial==false){
-      
-      average_func();
-      
-      initCloseLeft= closeLeft_average;
-      initCloseRight= closeRight_average;
-      initFarLeft=farLeft_average;
-      initFarRight= farRight_average;
-      initCenter = center_average;
-      
-      
-      Serial.print(" = ");
-      Serial.println(closeLeft_average);
-      
-      closeLeft_total=0; 
-      closeRight_total=0; 
-      farLeft_total=0; 
-      farRight_total=0;
-      initial=true;
-    }
-    index += 1;
-    index=index%(numSensor+1);
+
   }
 
 }
@@ -160,8 +263,8 @@ void read_ldrs()
   closeRightValues = analogRead(CLOSERIGHT);
   farLeftValues = analogRead(FARLEFT);
   farRightValues = analogRead(FARRIGHT);
-  //Serial.print(closeLeftValues);
-  //Serial.print("|");
+  //debugPrint(closeLeftValues);
+  //debugPrint("|");
   
   centerValues = analogRead(CENTER);
   center_total += centerValues;
@@ -184,17 +287,17 @@ void check_values()
   int diffCenter=(center_average -initCenter);
 
 /*
-  Serial.print(diffLeft);
-  Serial.print("|");
-  Serial.print(diffRight);
-  Serial.print("|");
-  Serial.print(closeLeft_average);
-  Serial.print("|");
-  Serial.print(closeRight_average);
-  Serial.print("|");
-  Serial.print(initCloseLeft);
-  Serial.print("|");
-  Serial.println(initCloseRight);
+  debugPrint(diffLeft);
+  debugPrint("|");
+  debugPrint(diffRight);
+  debugPrint("|");
+  debugPrint(closeLeft_average);
+  debugPrint("|");
+  debugPrint(closeRight_average);
+  debugPrint("|");
+  debugPrint(initCloseLeft);
+  debugPrint("|");
+  debugPrintln(initCloseRight);
 */
   if((diffLeftFar-diffCenter)>DIFFERENCE)
   {
@@ -258,63 +361,64 @@ void turn(int turn_signal) {
   int rmotor = 0;
   int lmotor = 0;
   int slowSpeed = t_speed/2;
+  currentMotorState = turn_signal;
   switch (turn_signal){
   case RIGHT:
-    Serial.println("Turn Right");
+    debugPrintln("Turn Right");
     rmotor = GO;
     lmotor = STILL;
     break;
 
   case LEFT:
-    Serial.println("Turn Left");
+    debugPrintln("Turn Left");
     rmotor = STILL;
     lmotor = GO;
     break;
 
   case FORWARD:
-    Serial.println("Go Forward");
+    debugPrintln("Go Forward");
     rmotor = GO;
     lmotor = GO;
     break;
 
   case BACK:
-    Serial.println("Go Backwards");
+    debugPrintln("Go Backwards");
     rmotor = REV;
     lmotor = REV;
     break;
 
   case STOP:
-    Serial.println("Stop");
+    debugPrintln("Stop");
     rmotor = STILL;
     lmotor = STILL;
     break;
 
   case ROTATE_RIGHT:
-    Serial.println("Rotate Right");
+    debugPrintln("Rotate Right");
     rmotor = REV;
     lmotor = GO;
     break;
 
   case ROTATE_LEFT:
-    Serial.println("Rotate Left");
+    debugPrintln("Rotate Left");
     rmotor = GO;
     lmotor = REV;
     break;
 
   case ROTATE_STOP:
-    Serial.println("Stop");
+    debugPrintln("Stop");
     rmotor = STILL;
     lmotor = STILL;
     break;
 
   case F_RIGHT:
-    Serial.println("Turn Sharp Right");
+    debugPrintln("Turn Sharp Right");
     rmotor = GO;
     lmotor = SLOW_GO;
     break;
 
   case F_LEFT:
-    Serial.println("Turn Sharp Left");
+    debugPrintln("Turn Sharp Left");
     rmotor = SLOW_GO;
     lmotor = GO;
     break;    
