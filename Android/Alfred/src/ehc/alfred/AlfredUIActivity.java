@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Set;
 import java.util.UUID;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -22,6 +23,7 @@ import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -79,6 +81,8 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	private BluetoothDevice bDevice;
 	private BluetoothSocket bSocket;
 	private OutputStream bOutput;
+	private InputStream bInput;
+	private boolean bluetoothConnected = false;
 	// found default online
 	private static final UUID SPP_UUID = UUID
 			.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -143,8 +147,9 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	};
 
 	// Bluetooth Receiver
-	final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	/*final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 		public void onReceive(Context context, Intent intent) {
+			Log.i("SEVE","Broadcast Received");
 			if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
 				bDevice = intent
 						.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -166,8 +171,8 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		};
 	};
-
-	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
+*/
+/*	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
 	private class BT_Thread extends Thread {
 		private final BluetoothSocket mmSocket;
 		private final InputStream mmInStream;
@@ -206,7 +211,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 
-		/* Call this from the main activity to send data to the remote device */
+		 Call this from the main activity to send data to the remote device 
 		public void write(byte[] bytes) {
 			try {
 				mmOutStream.write(bytes);
@@ -215,7 +220,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 
-		/* Call this from the main activity to shutdown the connection */
+		 Call this from the main activity to shutdown the connection 
 		public void cancel() {
 			try {
 				mmSocket.close();
@@ -243,10 +248,121 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			logToast("Socket Disconnected");
 		}
 	}
-
+*/
+	
+	private void bluetoothInitialization(){
+		
+		Log.i("SEVE","Initializing Bluetooth");
+		
+		bAdapter = BluetoothAdapter.getDefaultAdapter();
+		if (bAdapter != null) {
+			// Device Supports Bluetooth
+			
+			if (bAdapter.isEnabled()) {
+				
+				// Bluetooth is enabled on device
+				
+				
+				// Get all bluetooth devices that are paired
+				
+				Set<BluetoothDevice> pairedDevices = bAdapter.getBondedDevices();
+				
+				String[] device_names = new String[pairedDevices.size()];
+				String[] devices_addresses = new String[pairedDevices.size()];
+				
+				// If there are paired devices
+				if (pairedDevices.size() > 0) {
+					
+					int i = 0;
+				    // Loop through paired devices
+				    for (BluetoothDevice device : pairedDevices) {
+				        // Add the name and address to an array adapter to show in a ListView
+//				    	popToast(device.getName());
+//				        mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+				    	device_names[i] = device.getName();
+				    	devices_addresses[i] = device.getAddress();
+				    	i++;
+				    }
+				}
+				
+				
+				DialogFragment prompt = new BluetoothPrompt();
+				
+				Bundle args = new Bundle();
+				
+			    args.putStringArray("devices", device_names);
+			    args.putStringArray("device_addresses", devices_addresses);
+			    
+			    prompt.setArguments(args);
+				
+				prompt.show(getFragmentManager(), "test");
+				
+				
+				
+			}else{
+				popToast("[ERROR] Bluetooth Not Enabled");
+			}
+			
+			
+			
+			
+			
+		}else{
+			popToast("[ERROR] Device Does Not Support Bluetooth");
+		}
+		
+	}
+	
+	public void establishBluetoothConnection(String device_address){
+		
+		popToast("Device Selected, Address : " + device_address);
+		
+		BluetoothDevice device = bAdapter.getRemoteDevice(device_address);
+		
+		try {
+			bSocket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+			
+			// TODO SHOULD NOT BE CONNECTING on UI THREAD!!!!
+			// GET THIS CODE TO IT'S OWN THREAD
+			
+			bSocket.connect();
+			
+			bOutput = bSocket.getOutputStream();
+			bInput = bSocket.getInputStream();
+			
+			bluetoothConnected = true;
+			
+			popToast("Successfully Connected");
+			
+		} catch (IOException e) {
+			popToast("Create Socket Failure");
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
+	private void sendBluetoothMessage(String str){
+		Log.i("SEVE","Sending Message : " + str);
+		
+		if (bSocket != null && bSocket.isConnected()){
+			
+			try {
+				bOutput.write(str.getBytes());
+			} catch (IOException e) {
+				popToast("Couldn't send message!");
+			}
+			
+		}
+		
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Log.i("SEVE","CREATED");
 
 		setContentView(R.layout.activity_alfred_ui);
 		bluetoothInitialization();
@@ -281,7 +397,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		});
 	}
-
+/*
 	private void bluetoothInitialization() {
 		bAdapter = BluetoothAdapter.getDefaultAdapter();
 		startActivityForResult(new Intent(
@@ -290,7 +406,9 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 		registerReceiver(mReceiver, filter);
 		bAdapter.startDiscovery();
-	}
+		
+		
+	}*/
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
@@ -362,6 +480,12 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 
 	private void logToast(String str) {
 		popToast(str);
+		if (bluetoothConnected){
+			sendBluetoothMessage(str);
+			//bSocketSend(str);
+		}else{
+			popToast("Bluetooth Device Not Connected");
+		}
 		Log.i(TAG, str);
 	}
 
