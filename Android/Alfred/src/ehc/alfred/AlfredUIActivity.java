@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -78,10 +79,10 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 
 	// Bluetooth
 	private BluetoothAdapter bAdapter;
-	private BluetoothDevice bDevice;
 	private BluetoothSocket bSocket;
 	private OutputStream bOutput;
 	private InputStream bInput;
+	private boolean dispensing = false;
 	private boolean bluetoothConnected = false;
 	// found default online
 	private static final UUID SPP_UUID = UUID
@@ -172,7 +173,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		};
 	};
 */
-/*	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
+	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
 	private class BT_Thread extends Thread {
 		private final BluetoothSocket mmSocket;
 		private final InputStream mmInStream;
@@ -211,7 +212,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 
-		 Call this from the main activity to send data to the remote device 
+//		 Call this from the main activity to send data to the remote device 
 		public void write(byte[] bytes) {
 			try {
 				mmOutStream.write(bytes);
@@ -220,7 +221,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 
-		 Call this from the main activity to shutdown the connection 
+//		 Call this from the main activity to shutdown the connection 
 		public void cancel() {
 			try {
 				mmSocket.close();
@@ -229,7 +230,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 	}
-
+/*
 	private void bSocketSend(String msg) {
 		if (bSocket.isConnected()) {
 			byte[] byteMsg = msg.getBytes();
@@ -346,7 +347,9 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	private void sendBluetoothMessage(String str){
 		Log.i("SEVE","Sending Message : " + str);
 		
-		if (bSocket != null && bSocket.isConnected()){
+		if (bluetoothConnected && bSocket != null && bSocket.isConnected()){
+			
+			str += "\n";
 			
 			try {
 				bOutput.write(str.getBytes());
@@ -474,18 +477,30 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	}
 
 	private void onSodaButton(ImageButton button, int button_index) {
-		logToast("Soda Button: " + button_index);
+		if (!dispensing){
+			dispensing = true;
+			logToast("Soda Button: " + button_index);
+			// Send message to arduino to begin dispensing soda
+			sendBluetoothMessage("1," + Integer.toString(button_index));
+			
+			//TODO remove
+			// For now, stop dispensing after 2 seconds
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+			  @Override
+			  public void run() {
+				  sendBluetoothMessage("0,0");
+				  dispensing = false;
+			  }
+			}, 2000);
+		}
+		
+		
 		// button.setEnabled(false);
 	}
 
 	private void logToast(String str) {
 		popToast(str);
-		if (bluetoothConnected){
-			sendBluetoothMessage(str);
-			//bSocketSend(str);
-		}else{
-			popToast("Bluetooth Device Not Connected");
-		}
 		Log.i(TAG, str);
 	}
 
