@@ -73,15 +73,17 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	}
 
 	// Arduino Sensors
-	private int IR_SENSOR;
-	private int ULTRA_SOUND_SENSOR;
+//	private int IR_SENSOR;
+//	private int ULTRA_SOUND_SENSOR;
 	private int DISPENSING_COMPLETE_SENSOR;
+	private int MOTOR_STATE;
 
 	// Bluetooth
 	private BluetoothAdapter bAdapter;
 	private BluetoothSocket bSocket;
-	private OutputStream bOutput;
-	private InputStream bInput;
+//	private OutputStream bOutput;
+//	private InputStream bInput;
+	private BT_Thread btthread;
 	private boolean dispensing = false;
 	private boolean bluetoothConnected = false;
 	// found default online
@@ -174,62 +176,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	};
 */
 	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
-	private class BT_Thread extends Thread {
-		private final BluetoothSocket mmSocket;
-		private final InputStream mmInStream;
-		private final OutputStream mmOutStream;
-
-		public BT_Thread(BluetoothSocket socket) {
-			mmSocket = socket;
-			InputStream tmpIn = null;
-			OutputStream tmpOut = null;
-
-			// Get the input and output streams, using temp objects because
-			// member streams are final
-			try {
-				tmpIn = socket.getInputStream();
-				tmpOut = socket.getOutputStream();
-			} catch (IOException e) {
-			}
-
-			mmInStream = tmpIn;
-			mmOutStream = tmpOut;
-		}
-
-		public void run() {
-			byte[] buffer = new byte[1024]; // buffer store for the stream
-			int bytes; // bytes returned from read()
-
-			// Keep listening to the InputStream until an exception occurs
-			while (true) {
-				try {
-					// Read from the InputStream
-					bytes = mmInStream.read(buffer);
-
-				} catch (IOException e) {
-					break;
-				}
-			}
-		}
-
-//		 Call this from the main activity to send data to the remote device 
-		public void write(byte[] bytes) {
-			try {
-				mmOutStream.write(bytes);
-			} catch (IOException e) {
-				logToast("Unable to send message: " + bytes.toString());
-			}
-		}
-
-//		 Call this from the main activity to shutdown the connection 
-		public void cancel() {
-			try {
-				mmSocket.close();
-			} catch (IOException e) {
-				logToast("Unable to recv message");
-			}
-		}
-	}
+	
 /*
 	private void bSocketSend(String msg) {
 		if (bSocket.isConnected()) {
@@ -252,8 +199,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 */
 	
 	private void bluetoothInitialization(){
-		
-		Log.i("SEVE","Initializing Bluetooth");
 		
 		bAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (bAdapter != null) {
@@ -321,8 +266,16 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		BluetoothDevice device = bAdapter.getRemoteDevice(device_address);
 		
 		try {
+			
+			
 			bSocket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
 			
+			btthread = new BT_Thread(bSocket,this);
+			
+			btthread.start();
+			
+			
+			/*
 			// TODO SHOULD NOT BE CONNECTING on UI THREAD!!!!
 			// GET THIS CODE TO IT'S OWN THREAD
 			
@@ -330,7 +283,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			
 			bOutput = bSocket.getOutputStream();
 			bInput = bSocket.getInputStream();
-			
+			*/
 			bluetoothConnected = true;
 			
 			popToast("Successfully Connected");
@@ -339,23 +292,29 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			popToast("Create Socket Failure");
 			e.printStackTrace();
 		}
+	}
+	
+	public void interpretBluetoothData(String line) {
+		// See bluetooth_protocol.md for protocol info
 		
+		String[] values = line.split(",");
 		
+		MOTOR_STATE = Integer.parseInt(values[0]);
+		DISPENSING_COMPLETE_SENSOR = Integer.parseInt(values[1]);
+		
+		logToast("Motor State : " + values[0]);
+		logToast("Dispensing Complete Sensor : " + values[1]);
 		
 	}
 	
 	private void sendBluetoothMessage(String str){
-		Log.i("SEVE","Sending Message : " + str);
+		logToast("Sending Message Over Bluetooth : " + str);
 		
 		if (bluetoothConnected && bSocket != null && bSocket.isConnected()){
 			
 			str += "\n";
 			
-			try {
-				bOutput.write(str.getBytes());
-			} catch (IOException e) {
-				popToast("Couldn't send message!");
-			}
+			btthread.write(str.getBytes());
 			
 		}
 		
@@ -365,8 +324,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Log.i("SEVE","CREATED");
-
 		setContentView(R.layout.activity_alfred_ui);
 		bluetoothInitialization();
 
@@ -499,7 +456,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		// button.setEnabled(false);
 	}
 
-	private void logToast(String str) {
+	public void logToast(String str) {
 		popToast(str);
 		Log.i(TAG, str);
 	}
