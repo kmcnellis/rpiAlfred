@@ -14,14 +14,14 @@ motion of the motors and the reading of the dispensing sensor (a placeholder for
 
 Motor State integers correspond to the following states...
 
-0   =  ROTATE_RIGHT 
-1   =  ROTATE_LEFT 
-2   =  ROTATE_STOP 
-3   =  RIGHT 
-4   =  LEFT 
-5   =  FORWARD 
-6   =  BACK 
-7   =  STOP 
+    0   =  ROTATE_RIGHT 
+    1   =  ROTATE_LEFT 
+    2   =  ROTATE_STOP 
+    3   =  RIGHT 
+    4   =  LEFT 
+    5   =  FORWARD 
+    6   =  BACK 
+    7   =  STOP 
 
 So if the motor was going forward and the dispensing sensor read 117, the arduino should send...
 
@@ -33,8 +33,10 @@ ANDROID
 
 The android device controls the arduino's state (dispensing or moving)
 
-The device sends a message whenever it wants the arduino to change state.
+The device sends a message when the user presses a button, indicating the state the controller should be in (moving or dispensing) and the soda the user clicked on (a number 1-4). It should look like...
 
-It sends "0\n" for the moving state, and "1\n" for the dispensing state.
+    "[State],[Soda]\n"
+
+... where state is 0 for moving or 1 for dispensing.
 
 The arduino only cares about the last message sent.
