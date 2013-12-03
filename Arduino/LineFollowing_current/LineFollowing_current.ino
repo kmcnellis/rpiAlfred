@@ -146,12 +146,16 @@ void loop()
       closeRight_total=0; 
       farLeft_total=0; 
       farRight_total=0;
-      initial=true;
+      initial=findLine();
     }
     index += 1;
     index=index%(numSensor+1);
   }
 
+}
+boolean findLine()
+{
+  return true;
 }
 
 void read_ldrs()
@@ -259,14 +263,14 @@ void turn(int turn_signal) {
   int lmotor = 0;
   int slowSpeed = t_speed/2;
   switch (turn_signal){
-  case RIGHT:
-    Serial.println("Turn Right");
+  case F_RIGHT:
+    Serial.println("Turn Sharp Right");
     rmotor = GO;
     lmotor = STILL;
     break;
 
-  case LEFT:
-    Serial.println("Turn Left");
+  case F_LEFT:
+    Serial.println("Turn Sharp Left");
     rmotor = STILL;
     lmotor = GO;
     break;
@@ -307,14 +311,14 @@ void turn(int turn_signal) {
     lmotor = STILL;
     break;
 
-  case F_RIGHT:
-    Serial.println("Turn Sharp Right");
+  case RIGHT:
+    Serial.println("Turn Right");
     rmotor = GO;
     lmotor = SLOW_GO;
     break;
 
-  case F_LEFT:
-    Serial.println("Turn Sharp Left");
+  case LEFT:
+    Serial.println("Turn Left");
     rmotor = SLOW_GO;
     lmotor = GO;
     break;    
