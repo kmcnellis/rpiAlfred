@@ -83,80 +83,6 @@ void turn(int);
 void total_change();
 void start_line();
 
-
-void debugPrintln(String string){
-  if (debugMode){
-    Serial.println(string);
-  }
-}
-void debugPrint(String string){
-  if (debugMode){
-    Serial.print(string);
-  }
-}
-
-void debugPrintln(int integer){
-  if (debugMode){
-    Serial.println(integer);
-  }
-}
-void debugPrint(int integer){
-  if (debugMode){
-    Serial.print(integer);
-  }
-}
-
-// Send bluetooth message to android device
-void bluetoothWrite(int motorState, int cupLevel){
-  if (!debugMode){
-    // Send bluetooth device message
-    Serial.println(String(motorState) + "," + String(cupLevel));
-    Serial.flush();
-  }
-}
-
-// Read the LAST message sent from the android and interpret
-void bluetoothRead(){
-
-  // Fill line variable with serial contents
-  // Reset line if there is a newline character (so it only interprets the last message sent)
-
-  String line = "";
-  char character;
-
-  while (Serial.available()){
-    character = Serial.read();
-    if (character == '\n'){
-      line = "";
-    }else{
-      line.concat(character);
-    }
-  }
-
-  // Interpret contents of last message
-
-  // At the moment, there are only two possible cases
-  // "0" => Not Dispensing (Move)
-  // "1" => Dispensing (Don't Move)
-
-  if (line != ""){
-
-    int mode = line.toInt();
-
-    switch(mode){
-      case 0:
-      dispensing = false;
-      break;
-      case 1:
-      dispensing = true;
-      currentMotorState = STOP;
-      break;
-    }
-
-  }
-
-}
-
 void setup()
 {
   Serial.begin(9600);  //Begin serial communcation
@@ -481,3 +407,79 @@ void turn(int turn_signal) {
     break;    
   }
 }
+
+
+
+void debugPrintln(String string){
+  if (debugMode){
+    Serial.println(string);
+  }
+}
+void debugPrint(String string){
+  if (debugMode){
+    Serial.print(string);
+  }
+}
+
+void debugPrintln(int integer){
+  if (debugMode){
+    Serial.println(integer);
+  }
+}
+void debugPrint(int integer){
+  if (debugMode){
+    Serial.print(integer);
+  }
+}
+
+// Send bluetooth message to android device
+void bluetoothWrite(int motorState, int cupLevel){
+  if (!debugMode){
+    // Send bluetooth device message
+    Serial.println(String(motorState) + "," + String(cupLevel));
+    Serial.flush();
+  }
+}
+
+// Read the LAST message sent from the android and interpret
+void bluetoothRead(){
+
+  // Fill line variable with serial contents
+  // Reset line if there is a newline character (so it only interprets the last message sent)
+
+  String line = "";
+  char character;
+
+  while (Serial.available()){
+    character = Serial.read();
+    if (character == '\n'){
+      line = "";
+    }else{
+      line.concat(character);
+    }
+  }
+
+  // Interpret contents of last message
+
+  // At the moment, there are only two possible cases
+  // "0" => Not Dispensing (Move)
+  // "1" => Dispensing (Don't Move)
+
+  if (line != ""){
+
+    int mode = line.toInt();
+
+    switch(mode){
+      case 0:
+      dispensing = false;
+      break;
+      case 1:
+      dispensing = true;
+      currentMotorState = STOP;
+      break;
+    }
+
+  }
+
+}
+
