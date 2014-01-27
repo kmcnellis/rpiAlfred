@@ -75,6 +75,9 @@ void setup()
   closeRight_total=0; 
   farLeft_total=0; 
   farRight_total=0;
+   Serial.println("Initial");
+
+  initial();
 
   sensorTimer = millis()+100;
 }
