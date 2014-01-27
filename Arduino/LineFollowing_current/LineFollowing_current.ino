@@ -3,7 +3,6 @@
 #define FARRIGHT A3
 #define FARLEFT A0
 #define CENTER A4
-#define LENGTH_CACHE 20
 #define DIFFERENCE 15
 // rotation signals
 #define ROTATE_RIGHT 0
@@ -15,7 +14,7 @@
 #define FORWARD 5
 #define BACK 6
 #define STOP 7
- 
+
 #define F_RIGHT 8
 #define F_LEFT 19
 //motor control
@@ -55,6 +54,7 @@ void check_values();
 void turn(int);
 void total_change();
 void start_line();
+void initial();
 
 void setup()
 {
@@ -71,7 +71,7 @@ void setup()
   initFarRight=0;
   initFarLeft=0;
   initCenter=0;
-  
+
   closeLeft_total=0; 
   closeRight_total=0; 
   farLeft_total=0; 
@@ -88,7 +88,13 @@ void loop()
     read_ldrs();   
   }
 }
+void initial(){
+  for (int a=0; a<10; a++)
+  {
+    
+  }
 
+}
 void read_ldrs()
 {
   closeLeft_total= analogRead(CLOSELEFT)*.5 + closeLeft_total*.5;
@@ -120,24 +126,20 @@ void check_values()
   }
   else if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
   {
-    if (turnModeL)
-    {
+    if (turnModeL){
       turn(F_RIGHT);
     }
-    else
-    {  
+    else{  
       turn(RIGHT);
     }
     turnModeR=false;
   }
   else if(diffRight>diffLeft && diffRight>DIFFERENCE)
   {
-    if (turnModeR)
-    {
+    if (turnModeR){
       turn(F_LEFT);
     }
-    else
-    {  
+    else{  
       turn(LEFT);
     }
     turnModeL=false;
@@ -274,3 +276,4 @@ void turn(int turn_signal) {
     break;    
   }
 }
+
