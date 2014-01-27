@@ -42,7 +42,7 @@ int initCloseRight=0; //Contains intial values
 int initCloseLeft=0;
 int initFarRight=0;
 int initFarLeft=0;
-int initCenter=0;
+
 
 #define sensorSpeed 10   
 unsigned long sensorTimer;  
@@ -70,7 +70,6 @@ void setup()
   initCloseLeft=0;
   initFarRight=0;
   initFarLeft=0;
-  initCenter=0;
 
   closeLeft_total=0; 
   closeRight_total=0; 
@@ -89,18 +88,43 @@ void loop()
   }
 }
 void initial(){
+
   for (int a=0; a<10; a++)
   {
-    
+    initCloseRight+=analogRead(CLOSERIGHT); //Contains intial values
+    initCloseLeft+=analogRead(CLOSELEFT);
+    initFarRight+=analogRead(FARRIGHT);
+    initFarLeft+=analogRead(FARLEFT);
   }
+  initCloseRight=initCloseRight/10;
+  initCloseLeft=initCloseLeft/10;
+  initFarRight=initFarRight/10;
+  initFarLeft=initFarLeft/10;
+  
 
 }
 void read_ldrs()
 {
-  closeLeft_total= analogRead(CLOSELEFT)*.5 + closeLeft_total*.5;
-  closeRight_total+= analogRead(CLOSERIGHT)*.5 + closeRight_total*.5;
-  farLeft_total+= analogRead(FARLEFT)*.5 + farLeft_total*.5;
-  farRight_total+= analogRead(FARRIGHT*.5 + farRight_total*.5);
+  int closeLeft_val= analogRead(CLOSELEFT)*.5 + closeLeft_total*.5;
+  int closeRight_val= analogRead(CLOSERIGHT)*.5 + closeRight_total*.5;
+  int farLeft_val= analogRead(FARLEFT)*.5 + farLeft_total*.5;
+  int farRight_val= analogRead(FARRIGHT)*.5 + farRight_total*.5;
+  
+  Serial.print("Far Left:");
+  Serial.print(farLeft_val);
+  Serial.print(" | Close Left:");
+  Serial.print(closeLeft_val);
+  Serial.print(" | Close Right:");
+  Serial.print(closeRight_val);
+  Serial.print(" | Far Right:");
+  Serial.println(farRight_val);
+
+  
+  closeLeft_total=closeLeft_val;
+  closeRight_total=closeRight_val;
+  farLeft_total=farLeft_val;
+  farRight_total=farRight_val;
+  
   return;
 }
 
@@ -276,4 +300,5 @@ void turn(int turn_signal) {
     break;    
   }
 }
+
 
