@@ -33,15 +33,25 @@
 #define LED 12
 #define IR A3
 
+
 #define DARK_ON_LIGHT  0
 #define LIGHT_ON_DARK  1
 
 const int MODE = DARK_ON_LIGHT;
+
+int closeLeftValues;
+int closeRightValues;
+int farLeftValues;
+int farRightValues;
+int centerValues;
+
 int index = 0;
 int closeLeft_average=0,closeRight_average=0,farLeft_average=0,farRight_average=0,center_average=0;
-int closeLeft_total=0, closeRight_total=0, farLeft_total=0, farRight_total=0;
+int closeLeft_total=0, closeRight_total=0, farLeft_total=0, farRight_total=0, center_total;
+
 int t_speed=255;
-int initCloseRight=0; //Contains intial values
+//Contains intial values
+int initCloseRight=0;
 int initCloseLeft=0;
 int initFarRight=0;
 int initFarLeft=0;
@@ -51,8 +61,8 @@ int initCenter=0;
 unsigned long sensorTimer;  
 const int numSensor = LENGTH_CACHE-1;// number of values in array
 //function definitions
+
 boolean initial;
-boolean first;
 boolean turnModeR;
 boolean turnModeL;
 void read_ldrs();
@@ -61,6 +71,7 @@ void check_values();
 void turn(int);
 void total_change();
 void start_line();
+
 
 void setup()
 {
@@ -71,7 +82,6 @@ void setup()
   pinMode(lMotorb,OUTPUT);
   pinMode(LED, OUTPUT);
   initial=false;
-  first=false;
   turnModeR=false;
   turnModeL=false;
   initCloseRight=0; 
@@ -85,11 +95,13 @@ void setup()
   closeRight_average=0;
   farLeft_average=0;
   farRight_average=0;
+  center_average=0;
   
   closeLeft_total=0; 
   closeRight_total=0; 
   farLeft_total=0; 
   farRight_total=0;
+  center_total=0;
 
   sensorTimer = millis()+100;
 }
@@ -99,21 +111,34 @@ void loop()
   if (millis() >= sensorTimer) {   // pingSpeed milliseconds since last ping, do another ping.
     sensorTimer += sensorSpeed;  
     digitalWrite(LED, HIGH);
-    read_ldrs();   
+    read_ldrs();
+    if (initial==false){
+      Serial.print(closeLeftValues);
+      Serial.print(" , ");
+      Serial.print(closeRightValues);
+      Serial.print(" | ");
+
+    }
+    
     if (index==numSensor && initial==true){// initial = true means it was intialized index==numSensor
       check_values();
       closeLeft_total=0; 
       closeRight_total=0; 
       farLeft_total=0; 
       farRight_total=0;
+      center_total = 0;
     }
     else if(index==numSensor && initial==false){
+      
       average_func();
+      
       initCloseLeft= closeLeft_average;
       initCloseRight= closeRight_average;
       initFarLeft=farLeft_average;
       initFarRight= farRight_average;
       initCenter = center_average;
+      
+      
       Serial.print(" = ");
       Serial.println(closeLeft_average);
       
@@ -121,46 +146,74 @@ void loop()
       closeRight_total=0; 
       farLeft_total=0; 
       farRight_total=0;
-      initial=true;
+      initial=findLine();
     }
-    else if(index==numSensor &&first==false){
-      first==true;}
     index += 1;
     index=index%(numSensor+1);
   }
+
+}
+boolean findLine()
+{
+  return true;
 }
 
 void read_ldrs()
 {
-  closeLeft_total+= analogRead(CLOSELEFT);
-  closeRight_total+= analogRead(CLOSERIGHT);
-  farLeft_total+= analogRead(FARLEFT);
-  farRight_total+= analogRead(FARRIGHT);
+  closeLeftValues = analogRead(CLOSELEFT);
+  closeRightValues = analogRead(CLOSERIGHT);
+  farLeftValues = analogRead(FARLEFT);
+  farRightValues = analogRead(FARRIGHT);
+  //Serial.print(closeLeftValues);
+  //Serial.print("|");
+  
+  centerValues = analogRead(CENTER);
+  center_total += centerValues;
+
+  closeLeft_total+=closeLeftValues;
+  closeRight_total+=closeRightValues;
+  farLeft_total+=farLeftValues;
+  farRight_total+=farRightValues;
   return;
 }
 
 void check_values()
 {
   average_func();
-  int diffLeft=abs(closeLeft_average-initCloseLeft);
-  int diffRight=abs(closeRight_average -initCloseRight);
-  int diffLeftFar=abs(farLeft_average-initFarLeft);
-  int diffRightFar=abs(farRight_average -initFarRight);
 
-  if(diffLeftFar>DIFFERENCE)
+  int diffLeft=(closeLeft_average-initCloseLeft);
+  int diffRight=(closeRight_average -initCloseRight);
+  int diffLeftFar=(farLeft_average-initFarLeft);
+  int diffRightFar=(farRight_average -initFarRight);
+  int diffCenter=(center_average -initCenter);
+
+/*
+  Serial.print(diffLeft);
+  Serial.print("|");
+  Serial.print(diffRight);
+  Serial.print("|");
+  Serial.print(closeLeft_average);
+  Serial.print("|");
+  Serial.print(closeRight_average);
+  Serial.print("|");
+  Serial.print(initCloseLeft);
+  Serial.print("|");
+  Serial.println(initCloseRight);
+*/
+  if((diffLeftFar-diffCenter)>DIFFERENCE)
   {
     turnModeL=true;
     turnModeR=false;
     turn(F_RIGHT);
   }
-  else if(diffRightFar>DIFFERENCE)
+  else if(abs(diffRightFar-diffCenter)>DIFFERENCE)
   {
     turnModeR=true;
     turnModeL=false;
     turn(F_LEFT);
 
   }
-  else if(diffLeft>diffRight && diffLeft>DIFFERENCE)//this won't work for gradual/slow changes
+  else if(abs(diffLeft)>abs(diffRight) && abs(diffLeft-diffCenter)>DIFFERENCE)//this won't work for gradual/slow changes
   {
     if (turnModeL)
     {
@@ -172,7 +225,7 @@ void check_values()
     }
     turnModeR=false;
   }
-  else if(diffRight>diffLeft && diffRight>DIFFERENCE)
+  else if (abs(diffRight)>abs(diffLeft) && abs(diffRight-diffCenter)>DIFFERENCE)
   {
     if (turnModeR)
     {
@@ -200,6 +253,7 @@ void average_func()
   closeRight_average = closeRight_total/LENGTH_CACHE;
   farLeft_average = farLeft_total/LENGTH_CACHE;
   farRight_average = farRight_total/LENGTH_CACHE;
+  center_average = center_total/LENGTH_CACHE;
 
   return;
 }
@@ -209,14 +263,14 @@ void turn(int turn_signal) {
   int lmotor = 0;
   int slowSpeed = t_speed/2;
   switch (turn_signal){
-  case RIGHT:
-    Serial.println("Turn Right");
+  case F_RIGHT:
+    Serial.println("Turn Sharp Right");
     rmotor = GO;
     lmotor = STILL;
     break;
 
-  case LEFT:
-    Serial.println("Turn Left");
+  case F_LEFT:
+    Serial.println("Turn Sharp Left");
     rmotor = STILL;
     lmotor = GO;
     break;
@@ -257,14 +311,14 @@ void turn(int turn_signal) {
     lmotor = STILL;
     break;
 
-  case F_RIGHT:
-    Serial.println("Turn Sharp Right");
+  case RIGHT:
+    Serial.println("Turn Right");
     rmotor = GO;
     lmotor = SLOW_GO;
     break;
 
-  case F_LEFT:
-    Serial.println("Turn Sharp Left");
+  case LEFT:
+    Serial.println("Turn Left");
     rmotor = SLOW_GO;
     lmotor = GO;
     break;    
