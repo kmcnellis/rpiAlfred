@@ -1,7 +1,7 @@
-#define CLOSERIGHT A2
-#define CLOSELEFT A1
-#define FARRIGHT A3
 #define FARLEFT A0
+#define CLOSELEFT A1
+#define CLOSERIGHT A2
+#define FARRIGHT A3
 #define CENTER A4
 #define DIFFERENCE 15
 // rotation signals
@@ -59,6 +59,7 @@ void initial();
 void setup()
 {
   Serial.begin(9600);  //Begin serial communcation
+  analogReference(EXTERNAL);  
   pinMode(rMotorf,OUTPUT);
   pinMode(rMotorb,OUTPUT);
   pinMode(lMotorf,OUTPUT);
@@ -75,10 +76,10 @@ void setup()
   closeRight_total=0; 
   farLeft_total=0; 
   farRight_total=0;
-   Serial.println("Initial");
+  Serial.println("Initial");
 
   initial();
-
+  Serial.println("Running");
   sensorTimer = millis()+100;
 }
 
@@ -103,31 +104,48 @@ void initial(){
   initCloseLeft=initCloseLeft/10;
   initFarRight=initFarRight/10;
   initFarLeft=initFarLeft/10;
+  Serial.print("FL:");
+  Serial.print(initFarLeft);
+  Serial.print(" | CL:");
+  Serial.print(initCloseLeft);
+  Serial.print(" | CR:");
+  Serial.print(initCloseRight);
+  Serial.print(" | FR:");
+  Serial.println(initFarRight);
+ 
+
   
 
 }
 void read_ldrs()
 {
-  int closeLeft_val= analogRead(CLOSELEFT)*.5 + closeLeft_total*.5;
-  int closeRight_val= analogRead(CLOSERIGHT)*.5 + closeRight_total*.5;
-  int farLeft_val= analogRead(FARLEFT)*.5 + farLeft_total*.5;
-  int farRight_val= analogRead(FARRIGHT)*.5 + farRight_total*.5;
+  int closeLeft_val= analogRead(CLOSELEFT);
+  int closeRight_val= analogRead(CLOSERIGHT);
+  int farLeft_val= analogRead(FARLEFT);
+  int farRight_val= analogRead(FARRIGHT);
+  closeLeft_total=closeLeft_val*.5 + closeLeft_total*.5;
+  closeRight_total=closeRight_val*.5 + closeRight_total*.5;
+  farLeft_total=farLeft_val*.5 + farLeft_total*.5;
+  farRight_total=farRight_val*.5 + farRight_total*.5;
   
-  Serial.print("Far Left:");
+  
+  Serial.print("FL:");
   Serial.print(farLeft_val);
-  Serial.print(" | Close Left:");
+  Serial.print(" : ");
+  Serial.print(farLeft_total);
+  Serial.print(" | CL:");
   Serial.print(closeLeft_val);
-  Serial.print(" | Close Right:");
+  Serial.print(" : ");
+  Serial.print(closeLeft_total);
+  Serial.print(" | CR:");
   Serial.print(closeRight_val);
-  Serial.print(" | Far Right:");
-  Serial.println(farRight_val);
+  Serial.print(" : ");
+  Serial.print(closeRight_total);
+  Serial.print(" | FR:");
+  Serial.print(farRight_val);
+  Serial.print(" : ");
+  Serial.println(farRight_total);
 
-  
-  closeLeft_total=closeLeft_val;
-  closeRight_total=closeRight_val;
-  farLeft_total=farLeft_val;
-  farRight_total=farRight_val;
-  
   return;
 }
 
@@ -303,5 +321,6 @@ void turn(int turn_signal) {
     break;    
   }
 }
+
 
 
