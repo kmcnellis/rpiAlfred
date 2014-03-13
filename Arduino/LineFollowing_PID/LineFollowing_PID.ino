@@ -45,7 +45,7 @@ unsigned long sensorTimer;
 
 void read_ldrs();
 int check_values();
-void PID();
+int PID();
 void turn(int, int);
 bool sensor[NUMSENSOR];
 int initial[NUMSENSOR]={0};
@@ -81,7 +81,7 @@ void loop()
         sensorTimer += sensorSpeed;
         digitalWrite(LED, HIGH);
         read_ldrs();
-        PID();
+        turn(MOVE,PID());
         
     }
 }
@@ -89,13 +89,13 @@ void loop()
 void read_ldrs()
 {
     int sensorRead[NUMSENSOR];
-
+    
     sensorRead[0]=analogRead(S0);
     sensorRead[1]=analogRead(S1);
     sensorRead[2]=analogRead(S2);
     sensorRead[3]=analogRead(S3);
     sensorRead[4]=analogRead(S4);
-
+    
     for (int a=0; a<NUMSENSOR; a++) {
         if (MODE==LIGHT_ON_DARK) {
             if (sensorRead[a]=initial[0]+DIFFERENCE) {
@@ -158,7 +158,7 @@ int check_values()
     else if (sensor[0] && !sensor[1] && !sensor[2] && !sensor[3] && !sensor[4]) {
         error= -4;
     }
-   
+    
     
     else if (!sensor[0] && !sensor[1] && !sensor[2] && sensor[3] && sensor[4]) {
         error= 3;
@@ -180,22 +180,25 @@ int check_values()
     else if (sensor[0] && sensor[1] && sensor[2] && sensor[3] && !sensor[4]) {
         error= -5;
     }
-   
+    
     
     else if (sensor[0] && sensor[1] && sensor[2] && sensor[3] && sensor[4]) {
         error= 5;
     }
-
-
+    
+    else{
+        error=0;
+    }
     return error;
 }
 
-void PID(){
+int PID(){
     currError=check_values();
     int diff=currError-prevError;
     integral+=currError;
     prevError=currError;
     int power= Kp*currError + Ki*integral + Kd*diff;
+    return power;
 }
 void turn(int turn_signal, int power=255) {
     int rmotor = 0;
@@ -268,7 +271,7 @@ void turn(int turn_signal, int power=255) {
             rmotor = SLOW_GO;
             lmotor = GO;
             break;
-        
+            
     }
     switch (rmotor){
         case MOVE:
@@ -352,7 +355,7 @@ void turn(int turn_signal, int power=255) {
             
         case SLOW_REV:
             digitalWrite(lMotorf, LOW);
-            analogWrite(lMotorb, slowSpeed);  
-            break;    
+            analogWrite(lMotorb, slowSpeed);
+            break;
     }
 }
