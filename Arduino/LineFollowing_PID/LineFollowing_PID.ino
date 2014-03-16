@@ -82,8 +82,8 @@ void loop()
         digitalWrite(LED, HIGH);
         read_ldrs();
         turn(MOVE,PID());
-        
     }
+    
 }
 
 void read_ldrs()
@@ -157,9 +157,7 @@ int check_values()
     }
     else if (sensor[0] && !sensor[1] && !sensor[2] && !sensor[3] && !sensor[4]) {
         error= -4;
-    }
-    
-    
+    } 
     else if (!sensor[0] && !sensor[1] && !sensor[2] && sensor[3] && sensor[4]) {
         error= 3;
     }
@@ -204,6 +202,12 @@ void turn(int turn_signal, int power=255) {
     int rmotor = 0;
     int lmotor = 0;
     int slowSpeed = t_speed/2;
+    if (power>255){
+        power=255;
+    }
+    else if (power< -255){
+        power= -255
+    }
     switch (turn_signal){
         case MOVE:
             Serial.println("Turn PID");
@@ -275,6 +279,10 @@ void turn(int turn_signal, int power=255) {
     }
     switch (rmotor){
         case MOVE:
+            if (power>255) {
+                analogWrite(rMotorf, t_speed);
+                digitalWrite(rMotorb, LOW);
+            }
             if (power<0) {
                 analogWrite(rMotorf, t_speed);
                 digitalWrite(rMotorb, LOW);
