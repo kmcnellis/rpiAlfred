@@ -51,6 +51,10 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if(activity.mBluetoothAdapter.isEnabled() == false){
+			activity.popToast("Can't Control Robot without Bluetooth!");
+			return true;
+		}
 		// return super.onTouchEvent(event);
 		int action = event.getAction();
 //		canvas.setBackgroundColor(Color.RED); 
