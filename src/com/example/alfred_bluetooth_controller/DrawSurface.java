@@ -18,6 +18,7 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 	private boolean mouseDown = false;
 	
 	private Paint paint;
+	private Paint paintTouch;
 	
 	private MainActivity activity;
 	
@@ -30,8 +31,14 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 	protected void doDraw(Canvas canvas) {
 		// super.onDraw(canvas);
 		canvas.drawRGB(0, 0, 0);
-		canvas.drawCircle(canvas.getWidth()/2,canvas.getHeight() * 3 / 4, radius, paint);
-		canvas.drawCircle(mouseX, mouseY, radius, paint);
+		if(!mouseDown){
+			canvas.drawCircle(canvas.getWidth()/2,canvas.getHeight() * 3 / 4, radius, paint);
+			canvas.drawCircle(mouseX, mouseY, radius, paint);
+		}
+		else{
+			canvas.drawCircle(canvas.getWidth()/2,canvas.getHeight() * 3 / 4, radius, paintTouch);
+			canvas.drawCircle(mouseX, mouseY, radius, paintTouch);
+		}
 		
 		float xper =  mouseX / canvas.getWidth();
 		float multiplier = (float) ((((float) canvas.getHeight())*3/4 - mouseY) / canvas.getHeight() * 255 * 4 / 3 * (1 - Math.abs(.5 - xper)) * 2);
@@ -39,12 +46,14 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 		int right = (int) ((xper) * multiplier);
 		canvas.drawRect(0, canvas.getHeight() - left * 5, 100, canvas.getHeight(), paint);
 		canvas.drawRect(canvas.getWidth() - 100, canvas.getHeight() - right * 5, canvas.getWidth(), canvas.getHeight(), paint);
+
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// return super.onTouchEvent(event);
 		int action = event.getAction();
+//		canvas.setBackgroundColor(Color.RED); 
 		if (action == MotionEvent.ACTION_MOVE) {
 			mouseX = event.getX();
 			mouseY = event.getY();
@@ -68,7 +77,9 @@ public class DrawSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 		setFocusable(true); // make sure we get key events
 		paint = new Paint();
+		paintTouch = new Paint();
 		paint.setARGB(64, 255, 255, 255);
+		paintTouch.setARGB(100, 0, 255, 4);
 
 	}
 
