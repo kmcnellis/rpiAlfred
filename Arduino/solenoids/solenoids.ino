@@ -19,6 +19,7 @@ void setup() {
 	pinMode(SODA_2_PIN, OUTPUT);
 	pinMode(SODA_3_PIN, OUTPUT);
 	pinMode(SODA_4_PIN, OUTPUT);
+        Serial.println("Finished Setup");
 }
 
 void loop() {
@@ -43,8 +44,11 @@ void loop() {
 				break;
 		}
 	}
+        else{
+          Serial.println("Not Dispensing");
+        }
 
-	delay(100);
+	delay(250);
 	
 	digitalWrite(SODA_1_PIN, LOW);
 	digitalWrite(SODA_2_PIN, LOW);
@@ -57,14 +61,15 @@ void readBluetooth(){
 
   // Fill line variable with serial contents
   // Reset lines if there is a newline character (so it only interprets the last message sent)
-
   String line = "";
   byte mode;
 
-  while (Serial.available()){
+ while (Serial.available()){
     mode = Serial.read();
+    mode = mode-'0';
+//    Serial.println(mode);
   }
-
+ // mode = Serial.read();
   // Interpret contents of last message
 
   // At the moment, there are only two possible cases
