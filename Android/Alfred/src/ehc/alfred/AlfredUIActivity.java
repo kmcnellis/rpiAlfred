@@ -22,6 +22,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 
+import android.R.string;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
@@ -32,13 +33,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Camera;
+import android.graphics.Color;
 import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.CollapsibleActionView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import ehc.alfred.util.SystemUiHider;
 
@@ -89,6 +94,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	private BT_Thread btthread;
 	private boolean dispensing = false;
 	private boolean bluetoothConnected = false;
+	private boolean foundFace = false;
 	// found default online
 	private static final UUID SPP_UUID = UUID
 			.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -142,7 +148,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 				}
 
 				mOpenCvCameraView.enableView();
-//				mOpenCvCameraView.setCameraIndex(1);
+				
 			}
 				break;
 			default: {
@@ -283,67 +289,12 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cv_activity_surface_view);
 		mOpenCvCameraView.setCvCameraViewListener(this);
-//		mOpenCvCameraView.setCameraIndex(CameraInfo.CAMERA_FACING_FRONT);
-
-		soda_button1 = (ImageButton) findViewById(R.id.soda_button1);
-		soda_button2 = (ImageButton) findViewById(R.id.soda_button2);
+		mOpenCvCameraView.setCameraIndex(CameraInfo.CAMERA_FACING_FRONT);
 		
-		soda_button1.setOnTouchListener(new View.OnTouchListener() {
-			private Handler mHandler;
-
-		    @Override public boolean onTouch(View v, MotionEvent event) {
-		        switch(event.getAction()) {
-		        case MotionEvent.ACTION_DOWN:
-		            if (mHandler != null) return true;
-		            mHandler = new Handler();
-		            mHandler.postDelayed(mAction, 500);
-		            break;
-		        case MotionEvent.ACTION_UP:
-		            if (mHandler == null) return true;
-		            mHandler.removeCallbacks(mAction);
-		            mHandler = null;
-		            break;
-		        }
-		        return false;
-		    }
-
-		    Runnable mAction = new Runnable() {
-		        @Override public void run() {
-		        	onSodaButton(soda_button1, 1);
-		        	logToast("Pressing Soda 2");	
-		            mHandler.postDelayed(this, 250);
-		        }
-		    };
-		});
-		soda_button2.setOnTouchListener(new View.OnTouchListener() {
-			
-			private Handler mHandler;
-
-		    @Override public boolean onTouch(View v, MotionEvent event) {
-		        switch(event.getAction()) {
-		        case MotionEvent.ACTION_DOWN:
-		            if (mHandler != null) return true;
-		            mHandler = new Handler();
-		            mHandler.postDelayed(mAction, 500);
-		            break;
-		        case MotionEvent.ACTION_UP:
-		            if (mHandler == null) return true;
-		            mHandler.removeCallbacks(mAction);
-		            mHandler = null;
-		            break;
-		        }
-		        return false;
-		    }
-
-		    Runnable mAction = new Runnable() {
-		        @Override public void run() {
-		        	onSodaButton(soda_button2, 2);
-		        	logToast("Pressing Soda 2");	
-		            mHandler.postDelayed(this, 250);
-		        }
-		    };
-			
-		});
+//		final TextView myText = (TextView)findViewById(R.id.message);
+		
+//	    myText.setText("See You");
+	    
 
 	}
 
@@ -403,7 +354,33 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(
 					mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
 		Rect[] facesArray = faces.toArray();
-		
+		if (facesArray.length > 0){
+			foundFace = true;
+			Log.e(TAG, "Found Face");
+//			logToast("Found Face");
+		}
+		runOnUiThread(new Runnable() {
+			LinearLayout lView = (LinearLayout)findViewById(R.id.fullscreen_content);
+			final TextView myText = (TextView)findViewById(R.id.message);
+			
+		    public void run() {
+				String message ="";
+	            if (foundFace) {
+	            	lView.setBackgroundColor(Color.RED);
+	            	myText.setBackgroundColor(Color.RED);
+	            	myText.setTextColor(Color.BLACK);
+	            	message = "Enemy Detected!";
+				}
+	            if (!foundFace){
+	            	lView.setBackgroundColor(Color.BLACK);
+	            	myText.setBackgroundColor(Color.BLACK);
+	            	myText.setTextColor(Color.WHITE);
+	            	message = "All Clear";
+	            }
+	            myText.setText(message);
+	            foundFace = false;
+		    }
+		});
 		for (int i = 0; i < facesArray.length; i++)
 			Core.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(),
 					FACE_RECT_COLOR, 3);

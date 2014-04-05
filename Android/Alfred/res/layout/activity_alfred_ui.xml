@@ -20,43 +20,27 @@
         android:background="@color/black_overlay"
         android:keepScreenOn="true"
         android:orientation="vertical" > <!-- tools:ignore="UselessParent" -->
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".05"
+            android:ems="15"
+            android:gravity="center"
+            android:textColor="@color/red"
+            android:background="#000000"
+            android:textSize="@dimen/messageTextSize" />
+
 >
 
-        <LinearLayout
-            android:id="@+id/cv_content"
-            android:layout_width="320dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal" >
+        <org.opencv.android.JavaCameraView
+            android:id="@+id/cv_activity_surface_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".95"
+            opencv:camera_id="any" />
 
-            <org.opencv.android.JavaCameraView
-                android:id="@+id/cv_activity_surface_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                opencv:camera_id="any" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/fullscreen_content_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal" > <!-- tools:ignore="UselessParent" -->
- >
-
-            <ImageButton
-                android:id="@+id/soda_button1"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <ImageButton
-                android:id="@+id/soda_button2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-        </LinearLayout>
     </LinearLayout>
     <!--
          This FrameLayout insets its children based on system windows using
