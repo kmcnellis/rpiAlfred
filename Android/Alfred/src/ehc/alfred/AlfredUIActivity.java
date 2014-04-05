@@ -53,7 +53,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	private static final String TAG = "AlfredUI::Activity";
 
 	// UI
-	private static final Scalar FACE_RECT_COLOR = new Scalar(15, 15, 215, 255);
+	private static final Scalar FACE_RECT_COLOR = new Scalar(255,0,0, 255);
 	private CameraBridgeViewBase mOpenCvCameraView;
 	private ImageButton soda_button1;
 	private ImageButton soda_button2;
@@ -142,7 +142,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 				}
 
 				mOpenCvCameraView.enableView();
-				mOpenCvCameraView.setCameraIndex(2);
+//				mOpenCvCameraView.setCameraIndex(1);
 			}
 				break;
 			default: {
@@ -186,7 +186,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 				    }
 				}
 				
-				
 				DialogFragment prompt = new BluetoothPrompt();
 				
 				Bundle args = new Bundle();
@@ -203,9 +202,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}else{
 				popToast("[ERROR] Bluetooth Not Enabled");
 			}
-			
-			
-			
 			
 			
 		}else{
@@ -287,7 +283,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cv_activity_surface_view);
 		mOpenCvCameraView.setCvCameraViewListener(this);
-		mOpenCvCameraView.setCameraIndex(CameraInfo.CAMERA_FACING_FRONT);
+//		mOpenCvCameraView.setCameraIndex(CameraInfo.CAMERA_FACING_FRONT);
 
 		soda_button1 = (ImageButton) findViewById(R.id.soda_button1);
 		soda_button2 = (ImageButton) findViewById(R.id.soda_button2);
@@ -350,18 +346,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		});
 
 	}
-/*
-	private void bluetoothInitialization() {
-		bAdapter = BluetoothAdapter.getDefaultAdapter();
-		startActivityForResult(new Intent(
-				BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE),
-				DISCOVERY_REQUEST);
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		registerReceiver(mReceiver, filter);
-		bAdapter.startDiscovery();
-		
-		
-	}*/
 
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
@@ -419,6 +403,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2, 2, new Size(
 					mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
 		Rect[] facesArray = faces.toArray();
+		
 		for (int i = 0; i < facesArray.length; i++)
 			Core.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(),
 					FACE_RECT_COLOR, 3);
