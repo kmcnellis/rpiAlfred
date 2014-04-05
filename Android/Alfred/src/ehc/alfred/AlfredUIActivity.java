@@ -31,9 +31,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -139,6 +142,7 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 				}
 
 				mOpenCvCameraView.enableView();
+				mOpenCvCameraView.setCameraIndex(2);
 			}
 				break;
 			default: {
@@ -148,55 +152,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			}
 		}
 	};
-
-	// Bluetooth Receiver
-	/*final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-		public void onReceive(Context context, Intent intent) {
-			Log.i("SEVE","Broadcast Received");
-			if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
-				bDevice = intent
-						.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-				if (bDevice.getName().equals("BT UART")) {
-					bAdapter.cancelDiscovery();
-					try {
-						bSocket = bDevice
-								.createRfcommSocketToServiceRecord(SPP_UUID);
-						bSocket.connect();
-						logToast("Bluetooth Connected");
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						logToast("Socket Connection Failed");
-						popToast(e.getMessage());
-						e.printStackTrace();
-					}
-
-				}
-			}
-		};
-	};
-*/
-	// http://developer.android.com/guide/topics/connectivity/bluetooth.html
-	
-/*
-	private void bSocketSend(String msg) {
-		if (bSocket.isConnected()) {
-			byte[] byteMsg = msg.getBytes();
-			byte[] socketMsg = new byte[byteMsg.length + 1];
-			for (int i = 0; i < byteMsg.length; i++) {
-				socketMsg[i] = byteMsg[i];
-			}
-			socketMsg[socketMsg.length - 1] = '\0';
-			try {
-				bOutput = bSocket.getOutputStream();
-				bOutput.write(socketMsg);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			logToast("Socket Disconnected");
-		}
-	}
-*/
 	
 	private void bluetoothInitialization(){
 		
@@ -297,25 +252,24 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 	public void interpretBluetoothData(String line) {
 		// See bluetooth_protocol.md for protocol info
 		
-		String[] values = line.split(",");
+//		String[] values = line.split(",");
 		
-		MOTOR_STATE = Integer.parseInt(values[0]);
-		DISPENSING_COMPLETE_SENSOR = Integer.parseInt(values[1]);
+//		MOTOR_STATE = Integer.parseInt(values[0]);
+//		DISPENSING_COMPLETE_SENSOR = Integer.parseInt(values[1]);
 		
-		logToast("Motor State : " + values[0]);
-		logToast("Dispensing Complete Sensor : " + values[1]);
+//		logToast(line);
+//		logToast("Dispensing Complete Sensor : " + values[1]);
 		
 	}
 	
 	private void sendBluetoothMessage(String str){
-		logToast("Sending Message Over Bluetooth : " + str);
+//		logToast("Sending Message Over Bluetooth : " + str);
 		
 		if (bluetoothConnected && bSocket != null && bSocket.isConnected()){
 			
-			str += "\n";
+//			str += "\n";
 			
 			btthread.write(str.getBytes());
-			
 		}
 		
 	}
@@ -330,32 +284,71 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		// final View controlsView =
 		// findViewById(R.id.fullscreen_content_controls);
 		// final View contentView = findViewById(R.id.fullscreen_content);
+		
 		mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.cv_activity_surface_view);
 		mOpenCvCameraView.setCvCameraViewListener(this);
+		mOpenCvCameraView.setCameraIndex(CameraInfo.CAMERA_FACING_FRONT);
+
 		soda_button1 = (ImageButton) findViewById(R.id.soda_button1);
 		soda_button2 = (ImageButton) findViewById(R.id.soda_button2);
-		soda_button3 = (ImageButton) findViewById(R.id.soda_button3);
-		soda_button4 = (ImageButton) findViewById(R.id.soda_button4);
-		soda_button1.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onSodaButton((ImageButton) v, 1);
-			}
+		
+		soda_button1.setOnTouchListener(new View.OnTouchListener() {
+			private Handler mHandler;
+
+		    @Override public boolean onTouch(View v, MotionEvent event) {
+		        switch(event.getAction()) {
+		        case MotionEvent.ACTION_DOWN:
+		            if (mHandler != null) return true;
+		            mHandler = new Handler();
+		            mHandler.postDelayed(mAction, 500);
+		            break;
+		        case MotionEvent.ACTION_UP:
+		            if (mHandler == null) return true;
+		            mHandler.removeCallbacks(mAction);
+		            mHandler = null;
+		            break;
+		        }
+		        return false;
+		    }
+
+		    Runnable mAction = new Runnable() {
+		        @Override public void run() {
+		        	onSodaButton(soda_button1, 1);
+		        	logToast("Pressing Soda 2");	
+		            mHandler.postDelayed(this, 250);
+		        }
+		    };
 		});
-		soda_button2.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onSodaButton((ImageButton) v, 2);
-			}
+		soda_button2.setOnTouchListener(new View.OnTouchListener() {
+			
+			private Handler mHandler;
+
+		    @Override public boolean onTouch(View v, MotionEvent event) {
+		        switch(event.getAction()) {
+		        case MotionEvent.ACTION_DOWN:
+		            if (mHandler != null) return true;
+		            mHandler = new Handler();
+		            mHandler.postDelayed(mAction, 500);
+		            break;
+		        case MotionEvent.ACTION_UP:
+		            if (mHandler == null) return true;
+		            mHandler.removeCallbacks(mAction);
+		            mHandler = null;
+		            break;
+		        }
+		        return false;
+		    }
+
+		    Runnable mAction = new Runnable() {
+		        @Override public void run() {
+		        	onSodaButton(soda_button2, 2);
+		        	logToast("Pressing Soda 2");	
+		            mHandler.postDelayed(this, 250);
+		        }
+		    };
+			
 		});
-		soda_button3.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onSodaButton((ImageButton) v, 3);
-			}
-		});
-		soda_button4.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onSodaButton((ImageButton) v, 4);
-			}
-		});
+
 	}
 /*
 	private void bluetoothInitialization() {
@@ -429,7 +422,6 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 		for (int i = 0; i < facesArray.length; i++)
 			Core.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(),
 					FACE_RECT_COLOR, 3);
-
 		return mRgba;
 	}
 
@@ -438,21 +430,9 @@ public class AlfredUIActivity extends Activity implements CvCameraViewListener2 
 			dispensing = true;
 			logToast("Soda Button: " + button_index);
 			// Send message to arduino to begin dispensing soda
-			sendBluetoothMessage("1," + Integer.toString(button_index));
 			
-			//TODO remove
-			// For now, stop dispensing after 2 seconds
-			final Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-			  @Override
-			  public void run() {
-				  sendBluetoothMessage("0,0");
-				  dispensing = false;
-			  }
-			}, 2000);
 		}
-		
-		
+		sendBluetoothMessage(Integer.toString(button_index));
 		// button.setEnabled(false);
 	}
 

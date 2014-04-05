@@ -6,11 +6,13 @@
     android:background="#0099cc"
     android:orientation="vertical"
     tools:context=".AlfredUIActivity" >
+
     <!--
          The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc.
     -->
+
     <LinearLayout
         android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
@@ -19,19 +21,22 @@
         android:keepScreenOn="true"
         android:orientation="vertical" > <!-- tools:ignore="UselessParent" -->
 >
+
         <LinearLayout
             android:id="@+id/cv_content"
             android:layout_width="320dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal" >
+
             <org.opencv.android.JavaCameraView
                 android:id="@+id/cv_activity_surface_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                opencv:camera_id="front" />
+                opencv:camera_id="any" />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/fullscreen_content_buttons"
             android:layout_width="match_parent"
@@ -39,23 +44,15 @@
             android:layout_weight="1"
             android:orientation="horizontal" > <!-- tools:ignore="UselessParent" -->
  >
+
             <ImageButton
                 android:id="@+id/soda_button1"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
+
             <ImageButton
                 android:id="@+id/soda_button2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-            <ImageButton
-                android:id="@+id/soda_button3"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-            <ImageButton
-                android:id="@+id/soda_button4"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
@@ -65,10 +62,12 @@
          This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows.
     -->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true" >
+
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="?buttonBarStyle"
@@ -79,4 +78,5 @@
             tools:ignore="UselessParent" >
         </LinearLayout>
     </FrameLayout>
+
 </LinearLayout>

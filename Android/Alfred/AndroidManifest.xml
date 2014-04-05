@@ -3,14 +3,18 @@
     package="ehc.alfred"
     android:versionCode="1"
     android:versionName="1.0" >
+
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="16" />
+
     <permission android:name="android.permission.INTERNET" >
     </permission>
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -23,6 +27,7 @@
     <uses-feature
         android:name="android.hardware.camera.front.autofocus"
         android:required="false" />
+
     <application
         android:allowBackup="true"
         android:debuggable="true"
@@ -38,6 +43,7 @@
             android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!--
@@ -55,4 +61,5 @@
             android:required="false" />
         -->
     </application>
+
 </manifest>

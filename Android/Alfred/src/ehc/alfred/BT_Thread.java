@@ -94,6 +94,7 @@ public class BT_Thread extends Thread {
 				logToast("No Bluetooth Connection");
 			}
 		}
+		
 
 //		 Call this from the main activity to shutdown the connection 
 		public void cancel() {

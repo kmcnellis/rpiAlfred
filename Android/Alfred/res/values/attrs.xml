@@ -1,4 +1,5 @@
 <resources>
+
     <!--
          Declare custom theme attributes that allow changing which styles are
          used for button bars depending on the API level.
@@ -9,4 +10,5 @@
         <attr name="buttonBarStyle" format="reference" />
         <attr name="buttonBarButtonStyle" format="reference" />
     </declare-styleable>
+
 </resources>

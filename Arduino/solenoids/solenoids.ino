@@ -45,7 +45,7 @@ void loop() {
 		}
 	}
         else{
-          Serial.println("Not Dispensing");
+          //Serial.println("Not Dispensing :)");
         }
 
 	delay(250);
@@ -62,13 +62,17 @@ void readBluetooth(){
   // Fill line variable with serial contents
   // Reset lines if there is a newline character (so it only interprets the last message sent)
   String line = "";
-  byte mode;
+  char mode[1];
 
  while (Serial.available()){
-    mode = Serial.read();
-    mode = mode-'0';
-//    Serial.println(mode);
+//    mode = Serial.read();
+    Serial.readBytes(mode,1);
+//    mode[0] = mode[0]-'0';
   }
+  
+
+//  Serial.print("Mode: ");
+//  Serial.println(mode);
  // mode = Serial.read();
   // Interpret contents of last message
 
@@ -78,9 +82,11 @@ void readBluetooth(){
   // "2" => Dispensing Soda 2
   // "3" => Dispensing Soda 3
   // "4" => Dispensing Soda 4
-
-  if (mode > 0 || mode < 5){
-    dispensing = mode;
+  if(mode[0] == '1'){
+    dispensing = 1;
+  }
+  else if (mode[0] == '2'){
+    dispensing = 2;
   }
   else{
 	Serial.println("Stopped Dispensing!");  	
